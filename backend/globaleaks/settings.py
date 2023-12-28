@@ -64,7 +64,6 @@ class SettingsClass(object, metaclass=Singleton):
         self.jobs_operation_limit = 20
 
         self.devel_mode = False
-        self.disable_csp = False
 
         # Number of failed login enough to generate an alarm
         self.failed_login_alarm = 5
@@ -94,9 +93,8 @@ class SettingsClass(object, metaclass=Singleton):
 
         self.files_path = os.path.abspath(os.path.join(self.working_path, 'files'))
         self.attachments_path = os.path.abspath(os.path.join(self.working_path, 'attachments'))
-        self.tor_path = os.path.abspath(os.path.join(self.working_path, 'tor'))
-        self.tor_control = os.path.abspath(os.path.join(self.tor_path, 'tor_control'))
         self.tmp_path = os.path.abspath(os.path.join(self.working_path, 'tmp'))
+        self.tor_control = os.path.abspath(os.path.join(self.tmp_path, 'tor_control'))
 
         self.db_file_path = os.path.abspath(os.path.join(self.working_path, 'globaleaks.db'))
 
@@ -132,7 +130,6 @@ class SettingsClass(object, metaclass=Singleton):
 
     def load_cmdline_options(self, options):
         self.nodaemon = options.nodaemon
-        self.disable_csp = options.disable_csp
         self.bind_address = options.ip
         self.migrate_only = options.migrate_only
 

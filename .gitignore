@@ -2,6 +2,7 @@ backend/env
 client/node_modules
 client/.angular/cache
 scripts/
+dist/
 client/build
 client/app/lib
 backend/workingdir
@@ -10,7 +11,8 @@ client/app/viewer/pdf.min.js
 client/app/viewer/pdf.worker.min.js
 client/npm-shrinkwrap.json
 client/tmp
+client/app/assets/lib
 client/coverage/*
+client/cypress/downloads/*
 client/cypress/screenshots/*
-*.json
-client/coverage/
+path.py

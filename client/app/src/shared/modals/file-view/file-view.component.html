@@ -11,10 +11,7 @@
     <iframe #viewer *ngIf="args.loaded" id="viewer" class="w-100" [src]="iframeUrl" title="fileviewer" height="{{args.iframeHeight}}" sandbox="allow-downloads allow-scripts"></iframe>
 </div>
 <div class="modal-footer">
-    <a id="modal-action-cancel"
-       class="btn btn-outline-secondary"
-       (click)="cancel()">
-        <!-- <i class="fa-solid fa-times"></i> -->
+    <a id="modal-action-cancel" class="btn btn-outline-secondary" (click)="cancel()">
         <span>{{'Close'|translate}}</span>
     </a>
 </div>

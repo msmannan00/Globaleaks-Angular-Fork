@@ -2,11 +2,13 @@ import {Component, OnInit} from "@angular/core";
 import {Constants} from "@app/shared/constants/constants";
 import {Router} from "@angular/router";
 import {HttpClient} from "@angular/common/http";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {HttpService} from "@app/shared/services/http.service";
 import {AppDataService} from "@app/app-data.service";
-import {TranslationService} from "@app/services/translation.service";
-import {AppConfigService} from "@app/services/app-config.service";
+import {TranslationService} from "@app/services/helper/translation.service";
+import {AppConfigService} from "@app/services/root/app-config.service";
+import {BrowserCheckService} from "@app/shared/services/browser-check.service";
+import {TitleService} from "@app/shared/services/title.service";
 
 @Component({
   selector: "src-wizard",
@@ -19,10 +21,11 @@ export class WizardComponent implements OnInit {
   admin_check_password = "";
   recipientDuplicate = false;
   recipient_check_password = "";
-  tosAccept: any;
+  proxiedServer = false;
+  tosAccept: boolean;
   license = "";
   completed = false;
-  validation: any = {step2: false, step3: false, step4: false, step5: false, step6: false};
+  validation: {step2: boolean, step3: boolean, step4: boolean, step5: boolean, step6: boolean} = {step2: false, step3: false, step4: false, step5: false, step6: false};
   wizard = {
     "node_language": "en",
     "node_name": "",
@@ -49,10 +52,11 @@ export class WizardComponent implements OnInit {
     }
   ];
 
-  constructor(private translationService: TranslationService, private router: Router, private http: HttpClient, private authenticationService: AuthenticationService, private httpService: HttpService, protected appDataService: AppDataService, protected appConfigService: AppConfigService) {
+  constructor(private titleService:TitleService, protected browserCheckService: BrowserCheckService, private translationService: TranslationService, private router: Router, private http: HttpClient, private authenticationService: AuthenticationService, private httpService: HttpService, protected appDataService: AppDataService, protected appConfigService: AppConfigService) {
   }
 
   ngOnInit() {
+    this.verifyProxiedWizard();
     if (this.appDataService.public.node.wizard_done) {
       this.router.navigate(["/"]).then(_ => {
       });
@@ -62,13 +66,13 @@ export class WizardComponent implements OnInit {
     this.wizard.node_language = this.translationService.language;
 
     if (this.appDataService.pageTitle === "") {
-      this.appConfigService.setTitle();
+      this.titleService.setTitle();
     }
   }
 
-  selectProfile(name: any) {
+  selectProfile(name: string) {
     const self = this;
-    this.config_profiles.forEach(function (profile: any) {
+    this.config_profiles.forEach(function (profile: { name: string,title: string, active: boolean }) {
       profile.active = profile.name === name;
       if (profile.active) {
         self.wizard.profile = profile.name;
@@ -92,6 +96,18 @@ export class WizardComponent implements OnInit {
         }
       }
     );
+  }
+
+  verifyProxiedWizard(){
+    if (!this.appDataService.public.node.wizard_done && window.location.host === "localhost:4200") {
+      if(!window.navigator.userAgent.includes("Electron")){
+        this.proxiedServer = true;
+      }
+    }
+  }
+
+  openLocalhost() {
+    window.location.href = "https://127.0.0.1:8443/";
   }
 
   validateDuplicateRecipient() {

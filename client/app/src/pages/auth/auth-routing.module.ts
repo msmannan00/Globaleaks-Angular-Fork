@@ -9,16 +9,19 @@ const routes: Routes = [
     path: "",
     component: LoginComponent,
     pathMatch: "full",
+    data: {pageTitle: "Log in"},
   },
   {
     path: "passwordreset",
     component: PasswordResetComponent,
     pathMatch: "full",
+    data: {pageTitle: "Password reset"},
   },
   {
     path: "passwordreset/requested",
     component: PasswordRequestedComponent,
     pathMatch: "full",
+    data: {pageTitle: "Password reset"},
   }
 
 ];

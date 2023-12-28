@@ -1,58 +1,61 @@
-import {AfterViewInit, ChangeDetectorRef, Component, OnInit, QueryList, ViewChild, ViewChildren} from "@angular/core";
+import {Component, QueryList, ViewChild, ViewChildren} from "@angular/core";
 import {AppDataService} from "@app/app-data.service";
+import {WhistleblowerLoginResolver} from "@app/shared/resolvers/whistleblower-login.resolver";
 import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
-import {SubmissionService} from "@app/services/submission.service";
+import {SubmissionService} from "@app/services/helper/submission.service";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {NgForm} from "@angular/forms";
-
+import {AppConfigService} from "@app/services/root/app-config.service";
+import {Context, Questionnaire, Receiver} from "@app/models/app/public-model";
+import {Answers} from "@app/models/reciever/reciever-tip-data";
+import {Field} from "@app/models/resolvers/field-template-model";
+import * as Flow from "@flowjs/flow.js";
+import {TitleService} from "@app/shared/services/title.service";
+import {Router} from "@angular/router";
 @Component({
   selector: "src-submission",
   templateUrl: "./submission.component.html",
   providers: [SubmissionService]
 })
-export class SubmissionComponent implements OnInit, AfterViewInit{
+export class SubmissionComponent {
   @ViewChild("submissionForm") public submissionForm: NgForm;
   @ViewChildren("stepform") stepForms: QueryList<NgForm>;
 
-  isLoaded = false;
-  answers: any = {};
-  stepFormList: any = {};
+  answers: Answers = {};
+  stepFormList:{ [key: string]: NgForm } = {};
   identity_provided = false;
   context_id = "";
-  context: any = undefined;
-  receiversOrderPredicate: any;
+  context: Context | undefined = undefined;
+  receiversOrderPredicate: string;
   navigation = -1;
-  validate: any = [];
+  validate: boolean[] = [];
   score = 0;
   done: boolean;
-  uploads: any = {};
-  field_id_map: any;
-  questionnaire: any;
-  receiver_selection_step: number;
-  contextsOrderPredicate = this.appDataService.public.node.show_contexts_in_alphabetical_order ? "name" : "order";
-  selectable_contexts: any[];
-  submission: SubmissionService;
+  uploads: { [key: string]: any } = {};
+  field_id_map: { [key: string]: Field };
+  questionnaire: Questionnaire;
+  contextsOrderPredicate:string = this.appDataService.public.node.show_contexts_in_alphabetical_order ? "name" : "order";
+  selectable_contexts: Context[];
   show_steps_navigation_bar = false;
-  receivedData: any;
+  receivedData: Flow|null;
 
-  constructor(protected authenticationService: AuthenticationService, private appDataService: AppDataService, private utilsService: UtilsService, private fieldUtilitiesService: FieldUtilitiesService, private submissionService: SubmissionService, private cdr: ChangeDetectorRef) {
+  constructor(private titleService: TitleService, private router: Router, private appConfigService: AppConfigService, private whistleblowerLoginResolver: WhistleblowerLoginResolver, protected authenticationService: AuthenticationService, private appDataService: AppDataService, private utilsService: UtilsService, private fieldUtilitiesService: FieldUtilitiesService, public submissionService: SubmissionService) {
     this.selectable_contexts = [];
     this.receivedData = this.submissionService.getSharedData();
-  }
 
-  ngAfterViewInit(): void {
-    this.initializeSubmission();
-    this.isLoaded = true;
-    this.cdr.detectChanges();
-  }
-
-  ngOnInit() {
-    this.resetForm();
+    this.appConfigService.setPage("submissionpage");
+    if (!this.whistleblowerLoginResolver.loggedIn) {
+      this.utilsService.reloadCurrentRoute();
+    } else {
+      this.resetForm();
+      this.initializeSubmission();
+      this.whistleblowerLoginResolver.loggedIn = false;
+    }
   }
 
   firstStepIndex() {
-    return this.receiver_selection_step ? -1 : 0;
+    return this.submissionService.context.allow_recipients_selection ? -1 : 0;
   };
 
   prepareSubmission(context: any) {
@@ -61,15 +64,15 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
     this.uploads = {};
     this.questionnaire = context.questionnaire;
 
-    this.submission.create(context.id);
-    this.fieldUtilitiesService.onAnswersUpdate(this);
+    this.submissionService.create(context.id);
     this.context = context;
+    this.fieldUtilitiesService.onAnswersUpdate(this);
 
     this.field_id_map = this.fieldUtilitiesService.build_field_id_map(this.questionnaire);
-    this.show_steps_navigation_bar = this.context.allow_recipients_selection || this.questionnaire.steps.length > 1;
-    this.receiversOrderPredicate = this.submission.context.show_receivers_in_alphabetical_order ? "name" : null;
+    this.show_steps_navigation_bar = this.context?.allow_recipients_selection || this.questionnaire.steps.length > 1;
+    this.receiversOrderPredicate = this.submissionService.context.show_receivers_in_alphabetical_order ? "name" : "";
 
-    if (this.context.allow_recipients_selection) {
+    if (this.context?.allow_recipients_selection) {
       this.navigation = -1;
     } else {
       this.navigation = 0;
@@ -77,40 +80,36 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
   }
 
   selectable() {
-    if (this.submission.context.maximum_selectable_receivers === 0) {
+    if (this.submissionService.context.maximum_selectable_receivers === 0) {
       return true;
     }
-    return Object.keys(this.submission.selected_receivers).length < this.submission.context.maximum_selectable_receivers;
+    return Object.keys(this.submissionService.selected_receivers).length < this.submissionService.context.maximum_selectable_receivers;
   };
 
-  switch_selection(receiver: any) {
+  switchSelection(receiver: Receiver) {
     if (receiver.forcefully_selected) {
       return;
     }
 
-    if (this.submission.selected_receivers[receiver.id]) {
-      delete this.submission.selected_receivers[receiver.id];
+    if (this.submissionService.selected_receivers[receiver.id]) {
+      delete this.submissionService.selected_receivers[receiver.id];
     } else if (this.selectable()) {
-      this.submission.selected_receivers[receiver.id] = true;
+      this.submissionService.selected_receivers[receiver.id] = true;
     }
   };
 
-  onFieldUpdated() {
-  }
-
-  selectContext(context: any) {
+  selectContext(context: Context) {
     this.context = context;
     this.prepareSubmission(context);
   }
 
   initializeSubmission() {
-    this.submission = this.submissionService;
     let context = null;
 
     this.selectable_contexts = this.appDataService.public.contexts.filter(context => !context.hidden);
 
     if (this.context_id) {
-      context = this.appDataService.public.contexts.find(context => context.id === this.context);
+      context = this.appDataService.public.contexts.find(context => context.id === this.context?.id);
       this.prepareSubmission(context);
     } else if (this.selectable_contexts.length === 1) {
       context = this.selectable_contexts[0];
@@ -132,7 +131,7 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
   };
 
   areReceiversSelected() {
-    return Object.keys(this.submission.selected_receivers).length > 0;
+    return Object.keys(this.submissionService.selected_receivers).length > 0;
   };
 
   hasNextStep() {
@@ -143,11 +142,7 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
     return this.firstStepIndex() === this.lastStepIndex();
   };
 
-  initStepForm(form: NgForm, id: any) {
-    this.stepFormList[id] = form;
-  }
-
-  stepForm(index: any): any {
+  stepForm(index: number): any {
     if (this.stepForms && index !== -1) {
       return this.stepForms.get(index);
     }
@@ -246,19 +241,6 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
 
   };
 
-  checkForInvalidFields() {
-    for (let counter = 0; counter <= this.navigation; counter++) {
-      this.validate[counter] = true;
-      if (this.questionnaire.steps[counter].enabled) {
-        if (this.stepForms.get(counter)?.invalid) {
-          this.navigation = counter;
-          return false;
-        }
-      }
-    }
-    return true;
-  }
-
   completeSubmission() {
     this.receivedData = this.submissionService.getSharedData();
     if (this.receivedData !== null && this.receivedData !== undefined) {
@@ -270,9 +252,8 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
       this.utilsService.scrollToTop();
       return;
     }
-    this.submission._submission.identity_provided = this.identity_provided;
 
-    this.submission._submission.answers = this.answers;
+    this.submissionService.submission.answers = this.answers;
 
     this.utilsService.resumeFileUploads(this.uploads);
     this.done = true;
@@ -290,17 +271,60 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
         return;
       }
 
-      this.submission.submit();
-      clearInterval(intervalId); // Clear the interval
+      this.submissionService.submit().subscribe({
+        next: (response) => {
+          this.router.navigate(["/"]).then();
+          this.authenticationService.session.receipt = response.receipt;
+          this.titleService.setPage("receiptpage");
+        }
+      });
+
+      clearInterval(intervalId);
     }, 1000);
+  }
+
+  replaceReceivers(receivers: string[]): void {
+    Object.keys(this.submissionService.selected_receivers).forEach((key) => {
+      if (receivers.indexOf(key) === -1) {
+        delete this.submissionService.selected_receivers[key];
+      }
+    });
+  
+    receivers.forEach((receiverId) => {
+      if (receiverId in this.appDataService.receivers_by_id) {
+        this.submissionService.selected_receivers[receiverId] = true;
+      }
+    });
   }
 
   runValidation() {
     this.validate[this.navigation] = true;
+    return !((!this.areReceiversSelected() && this.firstStepIndex() && this.navigation==-1) || !this.checkForInvalidFields());
+  };
 
-    return !(!this.areReceiversSelected() || !this.checkForInvalidFields());
+  checkForInvalidFields() {
+    for (let counter = 0; counter <= this.navigation; counter++) {
+      this.validate[counter] = true;
+      if (this.questionnaire.steps[counter].enabled) {
+        if (this.stepForms.get(counter)?.invalid) {
+          this.navigation = counter;
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 
-
+  decrementStep() {
+    if (this.hasPreviousStep()) {
+      for (let i = this.navigation - 1; i >= this.firstStepIndex(); i--) {
+        if (i === -1 || this.fieldUtilitiesService.isFieldTriggered(null, this.questionnaire.steps[i], this.answers, this.score)) {
+          this.navigation = i;
+          this.utilsService.scrollToTop();
+          return;
+        }
+      }
+    }
   };
 
   incrementStep() {
@@ -324,18 +348,6 @@ export class SubmissionComponent implements OnInit, AfterViewInit{
       this.submissionForm.reset();
     }
   }
-
-  decrementStep() {
-    if (this.hasPreviousStep()) {
-      for (let i = this.navigation - 1; i >= this.firstStepIndex(); i--) {
-        if (i === -1 || this.fieldUtilitiesService.isFieldTriggered(null, this.questionnaire.steps[i], this.answers, this.score)) {
-          this.navigation = i;
-          this.utilsService.scrollToTop();
-          return;
-        }
-      }
-    }
-  };
 
   onFormChange() {
     this.fieldUtilitiesService.onAnswersUpdate(this);

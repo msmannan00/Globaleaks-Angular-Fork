@@ -1,13 +1,13 @@
 <div class="row">
     <div *ngIf="step === 1" class="col-md-6 wizard-block" [ngSwitch]="appDataService.public.node.mode">
         <div *ngSwitchCase="'default'">
-            <src-signupdefault (complete)="complete()"  [signup]="signup"></src-signupdefault>
+            <src-signupdefault (complete)="complete()" [signup]="signup"></src-signupdefault>
         </div>
         <div *ngSwitchCase="'demo'">
-            <src-signupdefault (complete)="complete()"  [signup]="signup"></src-signupdefault>
+            <src-signupdefault (complete)="complete()" [signup]="signup"></src-signupdefault>
         </div>
         <div *ngSwitchCase="'wbpa'">
-            <src-wbpa (updateSubdomain)=updateSubdomain() (complete)="complete()"  [signup]="signup"></src-wbpa>
+            <src-wbpa (updateSubdomain)=updateSubdomain() (complete)="complete()" [signup]="signup"></src-wbpa>
         </div>
     </div>
     <div *ngIf="step === 2" class="col-md-12 wizard-block">

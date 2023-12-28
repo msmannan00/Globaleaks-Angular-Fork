@@ -1,12 +1,14 @@
 import {Component} from "@angular/core";
+import {WbTipResolver} from "@app/shared/resolvers/wb-tip-resolver.service";
 import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
 import {ActivatedRoute} from "@angular/router";
 import {HttpService} from "@app/shared/services/http.service";
-import {WbtipService} from "@app/services/wbtip.service";
+import {WbtipService} from "@app/services/helper/wbtip.service";
 import {AppDataService} from "@app/app-data.service";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {Observable} from "rxjs";
-import {WBTipData} from "@app/models/whistleblower/WBTipData";
+import {Children, WbTipData} from "@app/models/whistleblower/wb-tip-data";
+import {Answers, Questionnaire} from "@app/models/reciever/reciever-tip-data";
+import {WhistleblowerIdentity} from "@app/models/app/shared-public-model";
 
 @Component({
   selector: "src-tippage",
@@ -17,53 +19,50 @@ export class TippageComponent {
   fileUploadUrl: string;
   tip_id = null;
   answers = {};
-  uploads: any = {};
+  uploads: { [key: string]: any }={};
   score = 0;
   ctx: string;
-  rows: any;
+  rows: Children[];
   questionnaire: any;
-  questionnaires: any;
+  questionnaires: Questionnaire[];
   identity_provided = false;
 
-  private submission: any;
-  protected tip: any;
+  private submission: { _submission: WbTipData[] } = { _submission: [] };
+  protected tip: WbTipData;
 
-  constructor(private fieldUtilitiesService: FieldUtilitiesService, protected utilsService: UtilsService, protected appDataService: AppDataService, private fieldUtilities: FieldUtilitiesService, private activatedRoute: ActivatedRoute, private httpService: HttpService, protected wbTipService: WbtipService) {
+  constructor(private fieldUtilities: FieldUtilitiesService, private wbTipResolver: WbTipResolver, private fieldUtilitiesService: FieldUtilitiesService, protected utilsService: UtilsService, protected appDataService: AppDataService, private activatedRoute: ActivatedRoute, private httpService: HttpService, protected wbTipService: WbtipService) {
   }
 
-  ngOnInit() {
+  ngOnInit() {    
+    let wpTip = this.wbTipResolver.dataModel;
+    if (wpTip) {
+      this.wbTipService.initialize(wpTip);
+      this.tip = this.wbTipService.tip;
 
-    const requestObservable: Observable<any> = this.httpService.whistleBlowerTip();
-    requestObservable.subscribe(
-      {
-        next: (response: WBTipData) => {
-          this.wbTipService.initialize(response);
-          this.tip = this.wbTipService.tip;
+      this.activatedRoute.queryParams.subscribe(params => {
+        this.tip.tip_id = params["tip_id"];
+      });
 
-          this.activatedRoute.queryParams.subscribe(params => {
-            this.tip.tip_id = params["tip_id"];
-          });
+      this.fileUploadUrl = "api/whistleblower/wbtip/wbfiles";
+      this.tip.context = this.appDataService.contexts_by_id[this.tip.context_id];
 
-          this.fileUploadUrl = "api/whistleblower/wbtip/wbfiles";
-          this.tip.context = this.appDataService.contexts_by_id[this.tip.context_id];
+      this.tip.receivers_by_id = this.utilsService.array_to_map(this.tip.receivers);
+      this.score = this.tip.score;
+      this.ctx = "wbtip";
+      this.preprocessTipAnswers(this.tip);
 
-          this.tip.receivers_by_id = this.utilsService.array_to_map(this.tip.receivers);
-          this.score = this.tip.score;
-          this.ctx = "wbtip";
-          this.preprocessTipAnswers(this.tip);
-
-          this.tip.submissionStatusStr = this.utilsService.getSubmissionStatusText(this.tip.status, this.tip.substatus, this.appDataService.submissionStatuses);
-          this.submission = {};
-          this.submission._submission = this.tip;
-          if (this.tip.receivers.length === 1 && this.tip.msg_receiver_selected === null) {
-            this.tip.msg_receiver_selected = this.tip.msg_receivers_selector[0].key;
-          }
-        }
+      this.tip.submissionStatusStr = this.utilsService.getSubmissionStatusText(this.tip.status,this.tip.substatus,this.appDataService.submissionStatuses);
+      this.submission._submission = [];
+      this.submission._submission = [this.tip];
+      if (this.tip.receivers.length === 1 && this.tip.msg_receiver_selected === null) {
+        this.tip.msg_receiver_selected = this.tip.msg_receivers_selector[0].key;
       }
-    );
+    } else {
+      this.utilsService.reloadCurrentRoute();
+    }
   }
 
-  filterNotTriggeredField(parent: any, field: any, answers: any) {
+  filterNotTriggeredField(parent: any, field: any, answers: Answers | WhistleblowerIdentity) {
     let i;
     if (this.fieldUtilities.isFieldTriggered(parent, field, answers, this.score)) {
       for (i = 0; i < field.children.length; i++) {
@@ -72,12 +71,12 @@ export class TippageComponent {
     }
   };
 
-  preprocessTipAnswers(tip: any) {
-    let x, i, j, k, step;
+  preprocessTipAnswers(tip: WbTipData) {
+    let i, j, k, step;
 
-    for (x = 0; x < tip.questionnaires.length; x++) {
+    for (let x = tip.questionnaires.length - 1; x >= 0; x--) {
       this.questionnaire = tip.questionnaires[x];
-      this.fieldUtilities.parseQuestionnaire(this.questionnaire, {});
+      this.fieldUtilities.parseQuestionnaire(this.questionnaire,{fields: [], fields_by_id: {}, options_by_id: {}});
 
       for (i = 0; i < this.questionnaire.steps.length; i++) {
         step = this.questionnaire.steps[i];
@@ -144,7 +143,7 @@ export class TippageComponent {
     return (100 - (progress / totalFiles) * 100);
   }
 
-  provideIdentityInformation(_: { param1: string, param2: number }) {
+  provideIdentityInformation(_: { param1: string, param2: Answers }) {
     const intervalId = setInterval(() => {
       if (this.uploads) {
         for (const key in this.uploads) {
@@ -158,22 +157,28 @@ export class TippageComponent {
       this.httpService.whistleBlowerIdentityUpdate({
         "identity_field_id": this.tip.whistleblower_identity_field.id,
         "identity_field_answers": this.answers
-      }, this.wbTipService.tip.id).subscribe
+      }).subscribe
       (
         {
-          next: _ => {
-            clearInterval(intervalId); // Clear the interval
-            this.utilsService.reloadCurrentRoute();
+          next: () => {
+            clearInterval(intervalId);
+            this.onReload();
           },
-          error: (_: any) => {
-            clearInterval(intervalId); // Clear the interval
-            this.utilsService.reloadCurrentRoute();
+          error: () => {
+            clearInterval(intervalId);
+            this.onReload();
           }
         }
       );
 
-    }, 1000);
+    }, 100);
 
+  }
+
+  onReload() {
+    this.wbTipResolver.onReload(() => {
+      this.utilsService.reloadCurrentRoute();
+    });
   }
 
   onFormChange() {

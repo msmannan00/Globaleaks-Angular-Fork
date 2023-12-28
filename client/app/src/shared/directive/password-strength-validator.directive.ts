@@ -16,7 +16,12 @@ export class PasswordStrengthValidatorDirective implements Validator {
   validate(control: AbstractControl): ValidationErrors | null {
     const pwd = control.value;
 
-    const types: any = {
+    const types: {
+      lower: boolean;
+      upper: boolean;
+      symbols: boolean;
+      digits: boolean;
+    } = {
       lower: /[a-z]/.test(pwd),
       upper: /[A-Z]/.test(pwd),
       symbols: /\W/.test(pwd),
@@ -25,13 +30,15 @@ export class PasswordStrengthValidatorDirective implements Validator {
 
     let variation1 = 0;
     let variation2 = 0;
-    const letters: any = {};
+    const letters: {[key: string]: number} = {};
     let score = 0;
 
     if (pwd) {
       /* Score symbols variation */
       for (const type in types) {
-        variation1 += types[type] ? 1 : 0;
+        if (types.hasOwnProperty(type)) {
+          variation1 += (types as Record<string, boolean>)[type] ? 1 : 0;
+        }
       }
 
       /* Score unique symbols */

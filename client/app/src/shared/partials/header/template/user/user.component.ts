@@ -1,10 +1,10 @@
 import {ChangeDetectorRef, Component} from "@angular/core";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {PreferenceResolver} from "@app/shared/resolvers/preference.resolver";
-import {AppConfigService} from "@app/services/app-config.service";
+import {AppConfigService} from "@app/services/root/app-config.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 import {AppDataService} from "@app/app-data.service";
-import {TranslationService} from "@app/services/translation.service";
+import {TranslationService} from "@app/services/helper/translation.service";
 import {HttpService} from "@app/shared/services/http.service";
 import {ActivatedRoute} from "@angular/router";
 
@@ -35,11 +35,13 @@ export class UserComponent {
     });
   }
 
-  onLogout() {
+  onLogout(event: Event) {
+    event.preventDefault();
     const promise = () => {
       localStorage.removeItem("default_language");
-      this.appConfigService.reinit(false);
       this.translationService.onChange(this.appDataService.public.node.default_language);
+      this.appConfigService.reinit(false);
+      this.appConfigService.onValidateInitialConfiguration();
     };
 
     this.authentication.logout(promise);

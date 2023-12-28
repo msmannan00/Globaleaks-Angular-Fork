@@ -1,15 +1,14 @@
 import {Injectable} from "@angular/core";
-import {Resolve} from "@angular/router";
 import {Observable, of} from "rxjs";
 import {switchMap} from "rxjs/operators";
 import {HttpService} from "@app/shared/services/http.service";
-import {AuthenticationService} from "@app/services/authentication.service";
-import {contextResolverModel} from "@app/models/resolvers/contextResolverModel";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
+import {contextResolverModel} from "@app/models/resolvers/context-resolver-model";
 
 @Injectable({
   providedIn: "root"
 })
-export class ContextsResolver implements Resolve<boolean> {
+export class ContextsResolver  {
   dataModel: contextResolverModel = new contextResolverModel();
 
   constructor(private httpService: HttpService, private authenticationService: AuthenticationService) {

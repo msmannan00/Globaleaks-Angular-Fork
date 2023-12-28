@@ -1,10 +1,13 @@
 import {Component, OnInit, QueryList, ViewChild, ViewChildren} from "@angular/core";
+import {WbTipResolver} from "@app/shared/resolvers/wb-tip-resolver.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {NgForm} from "@angular/forms";
-import {WbtipService} from "@app/services/wbtip.service";
+import {WbtipService} from "@app/services/helper/wbtip.service";
 import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 import {HttpService} from "@app/shared/services/http.service";
+import {Answers, Questionnaire3} from "@app/models/reciever/reciever-tip-data";
+import {Field} from "@app/models/resolvers/field-template-model";
 
 @Component({
   selector: "src-tip-additional-questionnaire-form",
@@ -15,17 +18,17 @@ export class TipAdditionalQuestionnaireFormComponent implements OnInit {
   @ViewChild("submissionForm") public submissionForm: NgForm;
   @ViewChildren("stepform") stepForms: QueryList<NgForm>;
 
-  validate: any = {};
-  navigation = 0;
-  score = 0;
-  questionnaire: any;
-  answers: any = {};
-  field_id_map: any;
+  validate: boolean[] = [];
+  navigation:number = 0;
+  score :number= 0;
+  questionnaire: Questionnaire3;
+  answers: Answers = {};
+  field_id_map: { [key: string]: Field };
   done: boolean = false;
-  uploads: any = {};
-  file_upload_url = "api/whistleblower/wbtip/rfile";
+  uploads:{ [key: string]: any };
+  file_upload_url:string = "api/whistleblower/wbtip/rfile";
 
-  constructor(private httpService: HttpService, private fieldUtilitiesService: FieldUtilitiesService, private utilsService: UtilsService, protected wbTipService: WbtipService, protected activeModal: NgbActiveModal) {
+  constructor(private wbTipResolver: WbTipResolver, private httpService: HttpService, private fieldUtilitiesService: FieldUtilitiesService, private utilsService: UtilsService, protected wbTipService: WbtipService, protected activeModal: NgbActiveModal) {
   }
 
   ngOnInit(): void {
@@ -193,11 +196,13 @@ export class TipAdditionalQuestionnaireFormComponent implements OnInit {
       this.httpService.whistleBlowerTipUpdate({
         "cmd": "additional_questionnaire",
         "answers": this.answers
-      }, this.wbTipService.tip.id).subscribe
+      }).subscribe
       (
         {
           next: _ => {
-            this.utilsService.reloadCurrentRoute();
+            this.wbTipResolver.onReload(() => {
+              this.utilsService.reloadCurrentRoute();
+            });
           }
         }
       );
@@ -207,7 +212,7 @@ export class TipAdditionalQuestionnaireFormComponent implements OnInit {
     }, 1000);
   }
 
-  stepForm(index: any): any {
+  stepForm(index: number): any {
     if (this.stepForms && index !== -1) {
       return this.stepForms.get(index);
     }

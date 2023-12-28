@@ -1,11 +1,11 @@
 <div class="modal-header">
     <div class="modal-title">{{'Additional questionnaire'|translate}}</div>
-    <button type="submit" class="close btn" [attr.aria-hidden]="true" (click)="activeModal.dismiss()"  [attr.aria-label]="'Close' | translate">
+    <button type="submit" class="close btn" [attr.aria-hidden]="true" (click)="activeModal.dismiss()" [attr.aria-label]="'Close' | translate">
         <i class="fa-solid fa-times"></i>
     </button>
 </div>
 <div class="modal-body">
-    <form #submissionForm="ngForm" autocomplete="off" novalidate [ngClass]="{'was-validated': displayErrors()}">
+    <form #submissionForm="ngForm" autocomplete="off" novalidate>
         <div class="tabbable tabs-below">
             <ul id="SubmissionTabsNavigationBox" class="nav nav-tabs" *ngIf="wbTipService.tip.additional_questionnaire.steps.length > 1">
                 <li class="nav-item" *ngFor="let step of wbTipService.tip.additional_questionnaire.steps | orderBy:'order' ;let index = index">
@@ -16,12 +16,10 @@
                     </ng-container>
                 </li>
             </ul>
-
             <div id="SubmissionTabsContentBox" class="tab-content">
                 <div *ngIf="displayErrors()">
-                    <src-submission-error [field_id_map]="field_id_map" [stepForms]="stepForms" [uploads]="uploads" [stepForm]="stepForm" [hasPreviousStep] = hasPreviousStep() [areReceiverSelected] = areReceiversSelected() [displayStepErrors]="displayStepErrors" [submissionForm]="submissionForm" ></src-submission-error>
+                    <src-submission-error [field_id_map]="field_id_map" [stepForms]="stepForms" [uploads]="uploads" [stepForm]="stepForm" [hasPreviousStep]=hasPreviousStep() [areReceiverSelected]=areReceiversSelected() [displayStepErrors]="displayStepErrors" [submissionForm]="submissionForm"></src-submission-error>
                 </div>
-
                 <div *ngFor="let step of this.questionnaire.steps | orderBy:'order'; let index = index">
                     <span *ngIf="step && step.enabled">
                         <div [class.hidden]="navigation !== index">
@@ -39,20 +37,18 @@
 </div>
 <div class="modal-footer">
     <div id="submission-buttons">
-        <br><button id="PreviousStepButton" class="btn btn-outline-secondary" *ngIf="hasPreviousStep()" (click)="decrementStep()">
+        <br>
+        <button id="PreviousStepButton" class="btn btn-outline-secondary" *ngIf="hasPreviousStep()" (click)="decrementStep()">
             <i class="fa-solid fa-arrow-circle-left"></i>
             <span>{{'Previous'|translate}}</span>
         </button>
-
         <button id="NextStepButton" class="btn btn-outline-secondary" *ngIf="hasNextStep()" (click)="incrementStep()">
             <span>{{'Next'|translate}}</span>
             <i class="fa-solid fa-arrow-circle-right"></i>
         </button>
-
         <button id="SubmitButton" class="btn btn-primary" [disabled]="done" *ngIf="!hasNextStep()" (click)="completeSubmission()" type="submit">
             <i id="SubmitIconOK" class="fa-solid fa-check"></i>
             <span>{{'Submit'|translate}}</span>
-<!--            <span data-ng-show="submission.wait">({{submission.countdown}})</span>-->
         </button>
     </div>
 </div>

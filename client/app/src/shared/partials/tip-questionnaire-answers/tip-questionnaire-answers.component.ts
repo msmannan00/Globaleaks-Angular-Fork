@@ -1,7 +1,7 @@
 import {Component, Input} from "@angular/core";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {WbtipService} from "@app/services/wbtip.service";
-import {ReceiverTipService} from "@app/services/receiver-tip.service";
+import {WbtipService} from "@app/services/helper/wbtip.service";
+import {ReceiverTipService} from "@app/services/helper/receiver-tip.service";
 
 @Component({
   selector: "src-tip-questionnaire-answers",

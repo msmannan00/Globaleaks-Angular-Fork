@@ -7,43 +7,14 @@ import {JsonPipe} from "@angular/common";
   selector: "ngbd-datepicker-range",
   standalone: true,
   imports: [NgbDatepickerModule, FormsModule, JsonPipe],
-  templateUrl: "./date-selector.component.html",
-  styles: [
-		`
-			.custom-day {
-				text-align: center;
-				padding: 0.185rem 0.25rem;
-				display: inline-block;
-				height: 2rem;
-				width: 2rem;
-			}
-			.custom-day.focused {
-				background-color: #e6e6e6;
-			}
-			.custom-day.range,
-			.custom-day:hover {
-				background-color: rgb(2, 117, 216);
-				color: white;
-			}
-			.custom-day.faded {
-				background-color: rgba(2, 117, 216, 0.5);
-			}
-		`,
-	],
+  templateUrl: "./date-selector.component.html"
 })
 export class DateRangeSelectorComponent {
   hoveredDate: NgbDate | null = null;
   @Output() emitDateSelection: EventEmitter<{ fromDate: string | null; toDate: string | null }> = new EventEmitter();
-  @Input() currentDates: any;
+  @Input() currentDates: {fromDate:NgbDate|null,toDate:NgbDate|null}|null;
   fromDate: NgbDate | null = null;
   toDate: NgbDate | null = null;
-
-  ngOnInit() {
-    if (this.currentDates) {
-      this.fromDate = this.currentDates.fromDate;
-      this.toDate = this.currentDates.toDate;
-    }
-  }
 
   onDateSelection(date: NgbDate) {
     if (!this.fromDate && !this.toDate) {
@@ -91,7 +62,7 @@ export class DateRangeSelectorComponent {
   }
 
   formatDate(date: NgbDate): string {
-    const jsDate = new Date(date.year, date.month - 1, date.day); // Month in JavaScript is 0-indexed
+    const jsDate = new Date(date.year, date.month - 1, date.day);
     return jsDate.toString();
   }
 }

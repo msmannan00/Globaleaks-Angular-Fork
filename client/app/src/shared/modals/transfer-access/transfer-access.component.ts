@@ -1,4 +1,5 @@
 import {Component, Input} from "@angular/core";
+import {Receiver} from "@app/models/app/public-model";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
@@ -6,15 +7,14 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
   templateUrl: "./transfer-access.component.html",
 })
 export class TransferAccessComponent {
-  @Input() usersNames: any;
-  @Input() selectableRecipients: any;
-  receiverId: string;
-
+  @Input() usersNames:  Record<string, string>|undefined;
+  @Input() selectableRecipients: Receiver[];
+  receiverId:{id: number};
 
   constructor(private activeModal: NgbActiveModal) {
   }
 
-  confirm(receiverId: any) {
+  confirm(receiverId: {id: number}) {
     this.activeModal.close(receiverId.id);
   }
 

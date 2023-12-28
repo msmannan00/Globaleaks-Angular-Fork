@@ -1,8 +1,7 @@
 import {Component, Input} from "@angular/core";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {AppDataService} from "@app/app-data.service";
-
+import {Receiver} from "@app/models/app/public-model";
 
 @Component({
   selector: "src-grant-access",
@@ -10,17 +9,13 @@ import {AppDataService} from "@app/app-data.service";
 })
 export class GrantAccessComponent {
 
-  @Input() args: any;
+  @Input() usersNames: Record<string, string>|undefined;
+  @Input() selectableRecipients: Receiver[];
   @Input() confirmFun: Function;
   @Input() cancelFun: Function;
-  receiver_id: any;
-  receivers_by_id: any = {};
+  receiver_id: {id: number};
 
-  constructor(private modalService: NgbModal, private utils: UtilsService, private appDataService: AppDataService) {
-  }
-
-  ngOnInit() {
-    this.receivers_by_id = this.appDataService.receivers_by_id;
+  constructor(private modalService: NgbModal, private utils: UtilsService) {
   }
 
   confirm() {

@@ -1,7 +1,8 @@
-import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import * as Flow from "@flowjs/flow.js";
-import {AuthenticationService} from "@app/services/authentication.service";
-import {SubmissionService} from "@app/services/submission.service";
+import { AuthenticationService } from "@app/services/helper/authentication.service";
+import { SubmissionService } from "@app/services/helper/submission.service";
+import { Observable } from "rxjs";
 
 @Component({
   selector: "src-voice-recorder",
@@ -10,11 +11,11 @@ import {SubmissionService} from "@app/services/submission.service";
 export class VoiceRecorderComponent implements OnInit {
   @Input() uploads: any;
   @Input() field: any;
-  @Input() fileUploadUrl: any;
-  @Input() entryIndex: any;
-  @Input() fieldEntry: any;
-  _fakeModel: any;
-  fileInput: any;
+  @Input() fileUploadUrl: string;
+  @Input() entryIndex: number;
+  @Input() fieldEntry: string;
+  _fakeModel: File;
+  fileInput: string;
   seconds: number = 0;
   activeButton: string | null = null;
   isRecording: boolean = false;
@@ -25,44 +26,32 @@ export class VoiceRecorderComponent implements OnInit {
   recorder: MediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream);
   recording_blob: any = null;
   flow: Flow;
-  secondsTracker: any = null;
+  secondsTracker: NodeJS.Timer | null = null;
   startTime: number;
   stopButton: boolean;
   recordButton: boolean;
-  vars: any;
   chunks: never[];
-  file: Flow;
 
   @Output() notifyFileUpload: EventEmitter<any> = new EventEmitter<any>();
-
-  constructor(protected authenticationService: AuthenticationService, private submissionService: SubmissionService) {
+  private audioContext: AudioContext;
+  entry: any;
+  constructor(private cd: ChangeDetectorRef, protected authenticationService: AuthenticationService, private submissionService: SubmissionService) {
   }
 
   ngOnInit(): void {
     this.fileInput = this.field ? this.field.id : "status_page";
-    this.uploads[this.fileInput] = {files: []};
+    this.uploads[this.fileInput] = { files: [] };
+    this.initAudioContext()
+  }
+  private initAudioContext() {
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
 
-  async initAudioContext(stream: MediaStream): Promise<void> {
-    window.AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    await this.enableNoiseSuppression(stream);
-
-    const source = this.context.createMediaStreamSource(stream);
-    const filter1 = this.createHighPassFilter(this.context);
-    const filter2 = this.createLowPassFilter(this.context);
-    const filter3 = this.createDynamicCompressor(this.context);
-
-    source.connect(filter1);
-    filter1.connect(filter2);
-    filter2.connect(filter3);
-    filter3.connect(this.mediaStreamDestination);
-  }
-
-  triggerRecording(fileId: any): void {
+  triggerRecording(fileId: string): void {
     this.activeButton = "record";
+
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices
-        .getUserMedia({audio: true})
+      navigator.mediaDevices.getUserMedia({ audio: true })
         .then((stream) => {
           this.startRecording(fileId, stream);
         })
@@ -72,12 +61,13 @@ export class VoiceRecorderComponent implements OnInit {
     }
   }
 
-  startRecording(fileId: string, stream: MediaStream): void {
+  startRecording = async (fileId: string, stream: MediaStream) => {
     this.isRecording = true;
-    this.audioPlayer = "";
-    this.activeButton = "record";
+    this.audioPlayer = '';
+    this.activeButton = 'record';
     this.seconds = 0;
     this.startTime = Date.now();
+
     this.flow = new Flow({
       target: this.fileUploadUrl,
       speedSmoothingFactor: 0.01,
@@ -85,7 +75,7 @@ export class VoiceRecorderComponent implements OnInit {
       allowDuplicateUploads: false,
       testChunks: false,
       permanentErrors: [500, 501],
-      headers: {"X-Session": this.authenticationService.session.id},
+      headers: { "X-Session": this.authenticationService.session.id },
       query: {
         type: "audio.webm",
         reference_id: fileId,
@@ -94,73 +84,111 @@ export class VoiceRecorderComponent implements OnInit {
 
     this.secondsTracker = setInterval(() => {
       this.seconds += 1;
-      if (this.seconds > this.field.attrs.max_len.value) {
+      if (this.seconds > parseInt(this.field.attrs.max_len.value)) {
         this.isRecording = false;
-        clearInterval(this.secondsTracker);
+        if (this.secondsTracker) {
+          clearInterval(this.secondsTracker);
+        }
         this.secondsTracker = null;
-        this.stopRecording();
+        this.stopRecording().subscribe();
       }
     }, 1000);
 
+    this.enableNoiseSuppression(stream).subscribe();
+    const mediaStreamDestination = this.audioContext.createMediaStreamDestination();
+    const source = this.audioContext.createMediaStreamSource(stream);
+    const anonymizationFilter = this.anonymizeSpeaker(this.audioContext);
+
+    source.connect(anonymizationFilter.input);
+    anonymizationFilter.output.connect(mediaStreamDestination);
+
+    source.connect(anonymizationFilter.input);
+    anonymizationFilter.output.connect(mediaStreamDestination);
+
+    const recorder = new MediaRecorder(mediaStreamDestination.stream);
+    recorder.onstop = () => {
+      this.onRecorderStop().subscribe();
+    };
+    recorder.ondataavailable = this.onRecorderDataAvailable.bind(this);
+    recorder.start();
+
     this.mediaRecorder = new MediaRecorder(stream);
-    this.initAudioContext(stream).then(() => {
-      this.mediaRecorder?.start();
-      this.recorder?.start();
-    });
-  }
+    this.mediaRecorder.onstop = () => {
+      recorder.stop();
+    };
+
+    this.mediaRecorder.start();
+  };
+
+  onRecorderDataAvailable = (e: BlobEvent) => {
+    this.recording_blob = e.data;
+    this.recording_blob.name = "audio.webm";
+    this.recording_blob.relativePath = "audio.webm";
+  };
 
 
-  async stopRecording(): Promise<void> {
-    // this.vars["recording"] = false;
-    this.mediaRecorder?.stop();
-    this.recorder?.stop();
-    const tracks = this.mediaRecorder?.stream.getTracks();
-    tracks?.forEach((track) => {
-      track.stop();
-    });
-    const dataAvailablePromise = new Promise<{ data: Blob | null, name: string, relativePath: string }>((resolve) => {
-      this.mediaRecorder!.ondataavailable = (e: BlobEvent) => {
-        resolve({
-          data: e.data,
-          name: "audio.webm",
-          relativePath: "audio.webm"
+  stopRecording(): Observable<void> {
+    return new Observable<void>((observer) => {
+      if (this.mediaRecorder) {
+        const tracks = this.mediaRecorder.stream.getTracks();
+        tracks.forEach((track) => {
+          track.stop();
         });
-      };
+        this.mediaRecorder.stop();
+      }
+
+      this.isRecording = false;
+      this.recordButton = false;
+      this.stopButton = true;
+      this.activeButton = null;
+
+      if (this.secondsTracker) {
+        clearInterval(this.secondsTracker);
+      }
+      this.secondsTracker = null;
+
+      if (this.seconds < this.field.attrs.min_len.value) {
+        this.deleteRecording();
+        observer.complete();
+        return;
+      }
+
+      if (this.mediaRecorder && (this.mediaRecorder.state === 'recording' || this.mediaRecorder.state === 'paused')) {
+        this.mediaRecorder.stop();
+      }
+
+      observer.next();
+      observer.complete();
     });
-
-    const {data, name, relativePath} = await dataAvailablePromise;
-    this.recording_blob = data;
-    this.recording_blob.name = name;
-    this.recording_blob.relativePath = relativePath;
-    this.isRecording = false;
-    this.recordButton = false;
-    this.stopButton = true;
-    this.activeButton = null;
-    clearInterval(this.secondsTracker);
-    this.secondsTracker = null;
-
-    if (this.seconds < this.field.attrs.min_len.value) {
-      this.deleteRecording();
-      return;
-    }
-
-    if (this.mediaRecorder && (this.mediaRecorder.state === "recording" || this.mediaRecorder.state === "paused")) {
-      this.mediaRecorder.stop();
-    }
-    this.onStop();
   }
+  onStop(): void {
+    this.stopRecording().subscribe();
+  }
+  onRecorderStop(): Observable<void> {
+    return new Observable<void>((observer) => {
+      this.flow.files = [];
 
-  onStop() {
-    this.flow.files = [];
-    if (Object.prototype.hasOwnProperty.call(this.uploads, this.fileInput)) {
-      delete this.uploads[this.fileInput];
-    }
-    if (this.seconds >= parseInt(this.field.attrs.min_len.value) && this.seconds <= parseInt(this.field.attrs.max_len.value)) {
-      this.audioPlayer = URL.createObjectURL(this.recording_blob);
-      this.flow.addFile(this.recording_blob);
-      this.uploads[this.fileInput] = this.flow;
-      this.submissionService.setSharedData(this.flow);
-    }
+      if (this.uploads.hasOwnProperty(this.fileInput)) {
+        delete this.uploads[this.fileInput];
+      }
+
+      if (this.seconds >= parseInt(this.field.attrs.min_len.value) && this.seconds <= parseInt(this.field.attrs.max_len.value)) {
+        this.flow.addFile(this.recording_blob);
+        this.audioPlayer = URL.createObjectURL(this.recording_blob);
+        this.uploads[this.fileInput] = this.flow;
+        this.submissionService.setSharedData(this.flow);
+
+        if (this.entry) {
+          if (!this.entry.files) {
+            this.entry.files = [];
+          }
+          this.entry.files.push(this.recording_blob.uniqueIdentifier);
+        }
+      }
+
+      this.cd.detectChanges();
+      observer.complete();
+    });
   }
 
   deleteRecording(): void {
@@ -173,41 +201,88 @@ export class VoiceRecorderComponent implements OnInit {
     this.audioPlayer = null;
     this.submissionService.setSharedData(null);
     delete this.uploads[this.fileInput];
-  }
-
-  async enableNoiseSuppression(stream: MediaStream): Promise<void> {
-    const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
-    if ("noiseSuppression" in supportedConstraints) {
-      const settings = {noiseSuppression: true};
-      stream.getAudioTracks().forEach(track => {
-        track.applyConstraints(settings);
-      });
+    if (this.entry && this.entry.files) {
+      delete this.entry.files;
     }
   }
 
-  createHighPassFilter(audioContext: AudioContext): BiquadFilterNode {
-    const filter = audioContext.createBiquadFilter();
-    filter.type = "highpass";
-    filter.frequency.value = 300;
-    return filter;
+  enableNoiseSuppression(stream: MediaStream): Observable<void> {
+    return new Observable<void>((observer) => {
+      const supportedConstraints = navigator.mediaDevices.getSupportedConstraints();
+
+      if ("noiseSuppression" in supportedConstraints) {
+        const settings = { noiseSuppression: true };
+
+        stream.getAudioTracks().forEach(track => {
+          track.applyConstraints(settings);
+        });
+
+        observer.complete();
+      }
+    });
   }
 
-  createLowPassFilter(audioContext: AudioContext): BiquadFilterNode {
-    const filter = audioContext.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 3000;
-    return filter;
+  private generateVocoderBands(startFreq: number, endFreq: number, numBands: number): { freq: number; Q: number }[] {
+    const vocoderBands: { freq: number; Q: number }[] = [];
+    const logStep: number = Math.log(endFreq / startFreq) / (numBands - 1);
+
+    for (let i = 0; i < numBands; i++) {
+      const lo: number = startFreq * Math.exp(i * logStep);
+      const hi: number = startFreq * Math.exp((i + 1) * logStep);
+      const fc: number = (hi + lo) / 2;
+      const bw: number = hi - lo;
+      const Q: number = fc / bw;
+
+      vocoderBands.push({ freq: fc, Q: Q });
+    }
+
+    return vocoderBands;
   }
 
-  createDynamicCompressor(audioContext: AudioContext): DynamicsCompressorNode {
-    const compressor = audioContext.createDynamicsCompressor();
-    compressor.threshold.value = -50;
-    compressor.knee.value = 40;
-    compressor.ratio.value = 12;
-    // compressor.reduction.value = -20;
-    compressor.attack.value = 0;
-    compressor.release.value = 0.25;
-    return compressor;
+  private generateRectifierCurve(): Float32Array {
+    const rectifierCurve = new Float32Array(65536);
+    for (let i = -32768; i < 32768; i++)
+      rectifierCurve[i + 32768] = ((i > 0) ? i : -i) / 32768;
+    return rectifierCurve;
   }
+
+  public anonymizeSpeaker(audioContext: AudioContext) {
+    const input: GainNode = audioContext.createGain();
+    const output: GainNode = audioContext.createGain();
+    input.gain.value = output.gain.value = 1;
+    const vocoderBands = this.generateVocoderBands(200, 16000, 128);
+    const vocoderPitchShift: number = -(1 / 12 - Math.random() * 1 / 24);
+
+    for (let i = 0; i < vocoderBands.length; i++) {
+      const carrier: OscillatorNode = audioContext.createOscillator();
+      carrier.frequency.value = vocoderBands[i].freq * Math.pow(2, vocoderPitchShift);
+      const modulatorBandFilter: BiquadFilterNode = audioContext.createBiquadFilter();
+      modulatorBandFilter.type = 'bandpass';
+      modulatorBandFilter.frequency.value = vocoderBands[i].freq;
+      modulatorBandFilter.Q.value = vocoderBands[i].Q;
+      const rectifier: WaveShaperNode = audioContext.createWaveShaper();
+      rectifier.curve = this.generateRectifierCurve();
+      const postRectifierBandFilter: BiquadFilterNode = audioContext.createBiquadFilter();
+      postRectifierBandFilter.type = 'lowpass';
+      postRectifierBandFilter.frequency.value = 20;
+      postRectifierBandFilter.gain.value = 1;
+      const postRectifierGain: GainNode = audioContext.createGain();
+      postRectifierGain.gain.value = 1;
+      const bandGain: GainNode = audioContext.createGain();
+      bandGain.gain.value = 0;
+      input.connect(modulatorBandFilter);
+      modulatorBandFilter.connect(rectifier);
+      rectifier.connect(postRectifierGain);
+      postRectifierGain.connect(bandGain.gain);
+
+      if (carrier) carrier.connect(bandGain);
+      if (bandGain) bandGain.connect(output);
+
+      if (carrier) carrier.start();
+    }
+    return { input: input, output: output };
+  }
+
 
 }
+

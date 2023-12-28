@@ -1,6 +1,5 @@
 import {NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
-
 import {ContextsRoutingModule} from "@app/pages/admin/contexts/contexts-routing.module";
 import {ContextsComponent} from "@app/pages/admin/contexts/contexts.component";
 import {FormsModule} from "@angular/forms";

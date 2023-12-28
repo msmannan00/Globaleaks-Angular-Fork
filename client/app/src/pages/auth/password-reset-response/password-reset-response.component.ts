@@ -1,8 +1,9 @@
 import {Component, OnInit} from "@angular/core";
-import {password_recovery_model} from "@app/models/authentication/password_recovery_model";
+import {PasswordRecoveryModel} from "@app/models/authentication/password-recovery-model";
 import {ActivatedRoute, Router} from "@angular/router";
 import {HttpService} from "@app/shared/services/http.service";
 import {UtilsService} from "@app/shared/services/utils.service";
+import {AppDataService} from "@app/app-data.service";
 
 @Component({
   selector: "src-password-reset-response",
@@ -10,9 +11,9 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class PasswordResetResponseComponent implements OnInit {
   state = "start";
-  request = new password_recovery_model();
+  request = new PasswordRecoveryModel();
 
-  constructor(private route: ActivatedRoute, private httpService: HttpService, private router: Router, protected utilsService: UtilsService) {
+  constructor(protected appDataService: AppDataService, private route: ActivatedRoute, private httpService: HttpService, private router: Router, protected utilsService: UtilsService) {
   }
 
   submit() {
@@ -26,7 +27,7 @@ export class PasswordResetResponseComponent implements OnInit {
         next: response => {
 
           if (response.status === "success") {
-            this.router.navigate([("/login")], {queryParams: {token: response.token}});
+            this.router.navigate([("/login")], {queryParams: {token: response.token}}).then();
           } else {
             if (response.status === "require_recovery_key") {
               this.request.recovery_key = "";

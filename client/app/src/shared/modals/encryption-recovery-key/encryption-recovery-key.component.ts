@@ -8,7 +8,7 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class EncryptionRecoveryKeyComponent {
 
-  @Input() erk: any;
+  @Input() erk: string;
 
   constructor(private activeModal: NgbActiveModal, protected utilsService: UtilsService) {
   }

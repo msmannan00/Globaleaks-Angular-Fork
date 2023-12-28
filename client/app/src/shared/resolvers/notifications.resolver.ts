@@ -1,15 +1,14 @@
 import {Injectable} from "@angular/core";
-import {Resolve,} from "@angular/router";
 import {Observable, of} from "rxjs";
 import {HttpService} from "@app/shared/services/http.service";
-import {AuthenticationService} from "@app/services/authentication.service";
-import {notificationResolverModel} from "@app/models/resolvers/notificationResolverModel";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
+import {notificationResolverModel} from "@app/models/resolvers/notification-resolver-model";
 import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: "root"
 })
-export class NotificationsResolver implements Resolve<boolean> {
+export class NotificationsResolver  {
   dataModel: notificationResolverModel = new notificationResolverModel();
 
   constructor(private httpService: HttpService, private authenticationService: AuthenticationService) {

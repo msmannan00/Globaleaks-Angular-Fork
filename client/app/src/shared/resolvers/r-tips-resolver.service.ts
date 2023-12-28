@@ -1,24 +1,33 @@
 import {Injectable} from "@angular/core";
-import {Resolve} from "@angular/router";
 import {Observable, of} from "rxjs";
 import {HttpService} from "@app/shared/services/http.service";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {map} from "rxjs/operators";
-import {rtipResolverModel} from "@app/models/resolvers/rtipsResolverModel";
+import {rtipResolverModel} from "@app/models/resolvers/rtips-resolver-model";
+import {UtilsService} from "@app/shared/services/utils.service";
 
 @Injectable({
   providedIn: "root"
 })
-export class RTipsResolver implements Resolve<boolean> {
+export class RTipsResolver  {
   dataModel: rtipResolverModel[] = [];
 
-  constructor(private httpService: HttpService, private authenticationService: AuthenticationService) {
+  reload(){
+    this.httpService.receiverTipResource().subscribe(
+        (response) => {
+          this.dataModel = response;
+          this.utilsService.reloadComponent();
+        }
+    );
+  }
+
+  constructor(private utilsService: UtilsService, private httpService: HttpService, private authenticationService: AuthenticationService) {
   }
 
   resolve(): Observable<boolean> {
     if (this.authenticationService.session.role === "receiver") {
       return this.httpService.receiverTipResource().pipe(
-        map((response: any) => {
+        map((response) => {
           this.dataModel = response;
           return true;
         })

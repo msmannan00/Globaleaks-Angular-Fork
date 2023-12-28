@@ -1,62 +1,50 @@
-import {HttpClient} from "@angular/common/http";
-import {Component, Input} from "@angular/core";
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {Component, Input, OnInit} from "@angular/core";
 import {DeleteConfirmationComponent} from "@app/shared/modals/delete-confirmation/delete-confirmation.component";
+import {UtilsService} from "@app/shared/services/utils.service";
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
 import {HttpService} from "@app/shared/services/http.service";
 import {QuestionnaireService} from "@app/pages/admin/questionnaires/questionnaire.service";
+import {Observable} from "rxjs";
+import { Step, questionnaireResolverModel } from "@app/models/resolvers/questionnaire-model";
+import { ParsedFields } from "@app/models/component-model/parsedFields";
+import { TriggeredByOption } from "@app/models/app/shared-public-model";
 
 @Component({
   selector: "src-steps-list",
   templateUrl: "./steps-list.component.html"
 })
-export class StepsListComponent {
-  @Input() step: any;
-  @Input() questionnaire: any;
-  @Input() index: any;
+export class StepsListComponent implements OnInit{
+  @Input() step: Step;
+  @Input() steps: Step[];
+  @Input() questionnaire: questionnaireResolverModel;
+  @Input() index: number;
   editing: boolean = false;
   showAddTrigger: boolean = false;
-  new_step: { label: string } = {label: ""};
-  parsedFields: any;
+  parsedFields: ParsedFields;
   new_trigger: { field: string; option: string; sufficient: boolean } = {
     field: "",
     option: "",
     sufficient: true,
   };
 
-  constructor(private questionnaireService: QuestionnaireService, private modalService: NgbModal, private fieldUtilities: FieldUtilitiesService, protected nodeResolver: NodeResolver, private httpClient: HttpClient, private httpService: HttpService) {
+  constructor(private utilsService: UtilsService, private questionnaireService: QuestionnaireService, private modalService: NgbModal, private fieldUtilities: FieldUtilitiesService, protected nodeResolver: NodeResolver, private httpService: HttpService) {
   }
 
   ngOnInit(): void {
-    this.parsedFields = this.fieldUtilities.parseQuestionnaire(this.questionnaire, {});
+    this.parsedFields = this.fieldUtilities.parseQuestionnaire(this.questionnaire,{fields: [], fields_by_id: {}, options_by_id: {}});
   }
 
-  swap($event: any, index: number, n: number): void {
-    $event.stopPropagation();
-
-    const target = index + n;
-    if (target < 0 || target >= this.questionnaire.steps.length) {
-      return;
-    }
-
-    [this.questionnaire.steps[index], this.questionnaire.steps[target]] =
-      [this.questionnaire.steps[target], this.questionnaire.steps[index]];
-
-    this.httpClient.put("/api/admin/steps", {
-      operation: "order_elements",
-      args: {
-        ids: this.questionnaire.steps.map((c: { id: any; }) => c.id),
-        questionnaire_id: this.questionnaire.id
-      },
-    }).subscribe();
+  swap($event:Event, index: number, n: number): void {
+    this.utilsService.swap($event, index,n , this.questionnaire)
   }
 
-  moveUp(e: any, idx: number): void {
+  moveUp(e:Event, idx: number): void {
     this.swap(e, idx, -1);
   }
 
-  moveDown(e: any, idx: number): void {
+  moveDown(e:Event, idx: number): void {
     this.swap(e, idx, 1);
   }
 
@@ -68,28 +56,30 @@ export class StepsListComponent {
     this.showAddTrigger = !this.showAddTrigger;
   }
 
-  saveStep(step: any) {
+  saveStep(step: Step) {
     return this.httpService.requestUpdateAdminQuestionnaireStep(step.id, step).subscribe(_ => {
       return this.questionnaireService.sendData();
     });
   }
 
-  deleteStep(step: any) {
-    this.openConfirmableModalDialog(step, "");
-
+  deleteStep(step: Step) {
+    this.openConfirmableModalDialog(step, "").subscribe();
   }
 
-  openConfirmableModalDialog(arg: any, scope: any): Promise<any> {
+  openConfirmableModalDialog(arg: Step, scope: any): Observable<string> {
     scope = !scope ? this : scope;
-    const modalRef = this.modalService.open(DeleteConfirmationComponent);
-    modalRef.componentInstance.arg = arg;
-    modalRef.componentInstance.scope = scope;
-    modalRef.componentInstance.confirmFunction = () => {
-      return this.httpService.requestDeleteAdminQuestionareStep(arg.id).subscribe(_ => {
-        return this.questionnaireService.sendData();
-      });
-    };
-    return modalRef.result;
+    return new Observable((observer) => {
+      let modalRef = this.modalService.open(DeleteConfirmationComponent,{backdrop: 'static',keyboard: false});
+      modalRef.componentInstance.arg = arg;
+      modalRef.componentInstance.scope = scope;
+
+      modalRef.componentInstance.confirmFunction = () => {
+        observer.complete()
+        return this.httpService.requestDeleteAdminQuestionareStep(arg.id).subscribe(_ => {
+          this.utilsService.deleteResource(this.steps,arg);
+        });
+      };
+    });
   }
 
   addTrigger() {
@@ -98,7 +88,7 @@ export class StepsListComponent {
     this.new_trigger = {"field": "", "option": "", "sufficient": true};
   }
 
-  delTrigger(trigger: any) {
+  delTrigger(trigger: TriggeredByOption) {
     const index = this.step.triggered_by_options.indexOf(trigger);
     if (index !== -1) {
       this.step.triggered_by_options.splice(index, 1);

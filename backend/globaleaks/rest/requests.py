@@ -193,7 +193,6 @@ AdminNodeDesc = {
     'description': str,
     'presentation': str,
     'footer': str,
-    'footer_accessibility_declaration': str,
     'footer_privacy_policy': str,
     'footer_whistleblowing_policy': str,
     'disclaimer_text': str,
@@ -242,7 +241,6 @@ AdminNodeDesc = {
     'adminonly': bool,
     'custom_support_url': url_regexp_or_empty,
     'pgp': bool,
-    'viewer': bool,
     'user_privacy_policy_text': str,
     'user_privacy_policy_url': str
 }
@@ -413,7 +411,6 @@ NodeDesc = {
     'enable_scoring_system': bool,
     'enable_signup': bool,
     'footer': str,
-    'footer_accessibility_declaration': str,
     'footer_privacy_policy': str,
     'footer_whistleblowing_policy': str,
     'header_title_homepage': str,
@@ -547,7 +544,6 @@ SiteSettingsDesc = {
     'disclaimer_text': str,
     'header_title_homepage': str,
     'footer': str,
-    'footer_accessibility_declaration': str,
     'footer_privacy_policy': str,
     'footer_whistleblowing_policy': str,
     'name': str,

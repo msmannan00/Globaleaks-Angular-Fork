@@ -1,27 +1,21 @@
 <div class="config-item">
-
-    <div class="editorHeader row" >
+    <div class="editorHeader row">
         <span class="col-md-7" (click)="toggleEditing()">
             <span>{{ context.name }}</span>
             <span class="badge bg-secondary" *ngIf="context.hidden">{{ 'Hidden' | translate }}</span>
         </span>
         <span class="col-md-5 clearfix">
             <span class="float-end">
-                <button *ngIf="index !== 0 && !nodeResolver.dataModel.show_contexts_in_alphabetical_order"
-                    class="btn btn-sm btn-primary" (click)="moveUp($event, index)" [ngbTooltip]="'Move up' | translate">
+                <button *ngIf="index !== 0 && !nodeResolver.dataModel.show_contexts_in_alphabetical_order" class="btn btn-sm btn-primary" (click)="moveUp($event, index)" data-toggle="tooltip" title="{{'Move up' | translate}}">
                     <i class="fa-solid fa-chevron-up"></i>
                 </button>
-
-                <button *ngIf="index !== contextsData.length - 1 && !nodeResolver.dataModel.show_contexts_in_alphabetical_order"
-                    class="btn btn-sm btn-primary" (click)="moveDown($event, index)"
-                    [ngbTooltip]="'Move down' | translate">
+                <button *ngIf="index !== contextsData.length - 1 && !nodeResolver.dataModel.show_contexts_in_alphabetical_order" class="btn btn-sm btn-primary" (click)="moveDown($event, index)" data-toggle="tooltip" title="{{'Move down' | translate}}">
                     <i class="fa-solid fa-chevron-down"></i>
                 </button>
                 <button class="btn btn-sm btn-outline-secondary" *ngIf="!editing" (click)="toggleEditing()">
                     <span>{{ 'Edit' | translate }}</span>
                 </button>
-                <button class="btn btn-sm btn-primary" *ngIf="editing" [disabled]="editContext.invalid"
-                    (click)="save_context(context)">
+                <button class="btn btn-sm btn-primary" *ngIf="editing" [disabled]="editContext.invalid" (click)="saveContext(context)">
                     <span>{{ 'Save' | translate }}</span>
                 </button>
                 <button class="btn btn-sm btn-outline-secondary" *ngIf="editing" (click)="toggleEditing()">
@@ -38,9 +32,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <div appImageUpload [imageUploadModel]="context" [imageUploadModelAttr]="'picture'"
-                        [imageUploadId]="context.id">
-                    </div>
+                    <div appImageUpload [imageUploadModel]="context" [imageUploadModelAttr]="'picture'" [imageUploadId]="context.id"></div>
                 </div>
                 <div class="form-group">
                     <label>{{ 'Name' | translate }}</label>
@@ -53,7 +45,7 @@
                 </div>
                 <div class="form-group">
                     <label>{{ 'Questionnaire' | translate }}</label>
-                    <select class="form-control" name="context.questionnaire_id" [(ngModel)]="context.questionnaire_id">
+                    <select class="form-select-custom" name="context.questionnaire_id" [(ngModel)]="context.questionnaire_id">
                         <option *ngFor="let item of questionnairesData" [value]="item.id">{{ item.name }}</option>
                     </select>
                 </div>
@@ -67,8 +59,7 @@
                     </label>
                     <div id="ReceiverContextAdder" class="row">
                         <div class="col-md-12" *ngIf="showSelect">
-                            <ng-select [(ngModel)]="selected.value" name="selected.value" bindLabel="name" [items]="usersData | filter:  'role': 'receiver'" [searchable]="true" [placeholder]="'Search' | translate"
-                                (change)="moveReceiver($event)">
+                            <ng-select [(ngModel)]="selected.value" [attr.placeholder]="'Search' | translate" name="selected.value" bindLabel="name" [items]="usersData | filter:  'role': 'receiver'" [searchable]="true" [placeholder]="'Search' | translate" (change)="moveReceiver($event)">
                                 <ng-template ng-option-tmp let-item="item">
                                     {{ item.name }}
                                 </ng-template>
@@ -79,15 +70,15 @@
                     <ol class="selection-list">
                         <li *ngFor="let receiver of context.receivers; let index = index">
                             <span *ngIf="!context.show_receivers_in_alphabetical_order">
-                                <span *ngIf="index !== 0" (click)="moveUpReceiver(index)" [ngbTooltip]="'Move up' | translate">
+                                <span *ngIf="index !== 0" (click)="moveUpReceiver(index)" data-toggle="tooltip" title="{{'Move up' | translate}}">
                                     <i class="fa-solid fa-chevron-up"></i>
                                 </span>
-                                <i *ngIf="(index !== receiver.length - 1) || (index !== 0)" class="fa-solid fa-none"></i>
-                                <span *ngIf="index !== receiver.length - 1" (click)="moveDownReceiver(index)" [ngbTooltip]="'Move down' | translate">
+                                <i *ngIf="(index !== context.receivers.length - 1) || (index !== 0)" class="fa-solid fa-none"></i>
+                                <span *ngIf="index !== context.receivers.length - 1" (click)="moveDownReceiver(index)" data-toggle="tooltip" title="{{'Move down' | translate}}">
                                     <i class="fa-solid fa-chevron-down"></i>
                                 </span>
                             </span>
-                            <span (click)="context.receivers.splice(index, 1);receiverNotSelectedFilter(adminReceiversById[receiver])" [ngbTooltip]="'Remove' | translate">
+                            <span (click)="context.receivers.splice(index, 1);receiverNotSelectedFilter(adminReceiversById[receiver])" data-toggle="tooltip" title="{{'Remove' | translate}}">
                                 <i class="fa-solid fa-times"></i>
                             </span>
                             <span>{{adminReceiversById[receiver].name}}</span>
@@ -97,18 +88,19 @@
                 <div class="form-group">
                     <div [ngClass]="{'is-invalid': editContext.form.get('reminder')?.errors?.['invalid']}">
                         <div class="input-group">
-                            <div class="dual_title"><span>{{ 'Reminder date' | translate }}</span> ({{ 'days' | translate }})</div>
+                            <div class="dual_title">
+                                <span>{{ 'Reminder date' | translate }}</span> ({{ 'days' | translate }})
+                            </div>
                         </div>
                         <div class="input-group">
-                            <input class="form-control" name="reminder" (ngModelChange)="onReminderChanged()" [(ngModel)]="context.tip_reminder" type="number" min="0" />
+                            <input class="form-control" name="reminder" [(ngModel)]="context.tip_reminder" type="number" min="0" />
                         </div>
                     </div>
                     <div>{{ 'Set the value to 0 to disable this feature.' | translate }}</div>
                 </div>
                 <div class="form-group">
                     <label>
-                        <span>{{ 'Expiration date' | translate }}</span> ({{ 'days' | translate }})
-                    </label>
+                        <span>{{ 'Expiration date' | translate }}</span> ({{ 'days' | translate }}) </label>
                     <div [ngClass]="{'is-invalid': editContext.form.get('timetolive')?.errors?.['invalid']}">
                         <input class="form-control" name="timetolive" [(ngModel)]="context.tip_timetolive" type="number" min="0" max="3650" />
                     </div>
@@ -146,25 +138,20 @@
                             <div *ngIf="context.allow_recipients_selection" class="form-group well">
                                 <div class="form-group">
                                     <label class="inline-checkbox">
-                                        <input type="checkbox" name="context.select_all_receivers" [(ngModel)]="context.select_all_receivers"
-                                            [disabled]="!context.allow_recipients_selection"
-                                            (click)="context.maximum_selectable_receivers = 0" />
+                                        <input type="checkbox" name="context.select_all_receivers" [(ngModel)]="context.select_all_receivers" [disabled]="!context.allow_recipients_selection" (click)="context.maximum_selectable_receivers = 0" />
                                         <span>{{ 'Select all recipients by default' | translate }}</span>
                                     </label>
                                 </div>
                                 <div class="form-group">
                                     <label class="inline-checkbox">
                                         <span>{{ 'Maximum number of selectable recipients:' | translate }}</span>
-                                        <input class="form-control" type="number" name="context.maximum_selectable_receivers"
-                                            [(ngModel)]="context.maximum_selectable_receivers" min="0"
-                                            [disabled]="context.select_all_receivers" />
+                                        <input class="form-control" type="number" name="context.maximum_selectable_receivers" [(ngModel)]="context.maximum_selectable_receivers" min="0" [disabled]="context.select_all_receivers" />
                                     </label>
                                     <div>{{ 'Set the value to 0 to disable this feature.' | translate }}</div>
                                 </div>
                                 <div class="form-group">
                                     <label class="inline-checkbox">
-                                        <input type="checkbox"
-                                            [(ngModel)]="context.show_receivers_in_alphabetical_order" name="context.show_receivers_in_alphabetical_order" />
+                                        <input type="checkbox" [(ngModel)]="context.show_receivers_in_alphabetical_order" name="context.show_receivers_in_alphabetical_order" />
                                         <span>{{ 'Show recipients in alphabetical order' | translate }}</span>
                                     </label>
                                 </div>
@@ -172,8 +159,7 @@
                             <div class="form-group">
                                 <label class="inline-checkbox">
                                     <input type="checkbox" [(ngModel)]="context.show_recipients_details" name="context.show_recipients_details" />
-                                    <span>{{ 'Show recipient details on the status page of the report' | translate
-                                        }}</span>
+                                    <span>{{ 'Show recipient details on the status page of the report' | translate}}</span>
                                 </label>
                             </div>
                             <div class="form-group">
@@ -196,7 +182,7 @@
                             </div>
                             <div class="form-group">
                                 <label>{{ 'Additional questionnaire' | translate }}</label>
-                                <select class="form-control" [(ngModel)]="context.additional_questionnaire_id" name="context.additional_questionnaire_id">
+                                <select class="form-select-custom" [(ngModel)]="context.additional_questionnaire_id" name="context.additional_questionnaire_id">
                                     <option *ngIf="context.additional_questionnaire_id" [value]="null"></option>
                                     <option [value]="item.id" *ngFor="let item of questionnairesData">{{ item.name }}
                                     </option>
@@ -207,31 +193,35 @@
                                 <div class="form-group well">
                                     <table class="table table-bordered">
                                         <thead>
-                                            <tr>
-                                                <th>{{ 'Threshold' | translate }}</th>
-                                                <th>{{ 'Value' | translate }}</th>
-                                            </tr>
+                                        <tr>
+                                            <th>{{ 'Threshold' | translate }}</th>
+                                            <th>{{ 'Value' | translate }}</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>{{ 'Medium' | translate }}</td>
-                                                <td><input class="form-control" type="number" [(ngModel)]="context.score_threshold_medium" name="context.score_threshold_medium" /></td>
-                                            </tr>
-                                            <tr>
-                                                <td>{{ 'High' | translate }}</td>
-                                                <td><input class="form-control" type="number" [(ngModel)]="context.score_threshold_high" name="context.score_threshold_high" /></td>
-                                            </tr>
+                                        <tr>
+                                            <td>{{ 'Medium' | translate }}</td>
+                                            <td>
+                                                <input class="form-control" type="number" [(ngModel)]="context.score_threshold_medium" name="context.score_threshold_medium" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>{{ 'High' | translate }}</td>
+                                            <td>
+                                                <input class="form-control" type="number" [(ngModel)]="context.score_threshold_high" name="context.score_threshold_high" />
+                                            </td>
+                                        </tr>
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <hr />
-        <div class="form-group">UUID: <a [href]="'#/submission?context=' + context.id" target="_blank">{{context.id}}</a></div>
+        <div class="form-group">UUID: <a [href]="'#/submission?context=' + context.id" target="_blank">{{context.id}}</a>
+        </div>
     </div>
 </div>

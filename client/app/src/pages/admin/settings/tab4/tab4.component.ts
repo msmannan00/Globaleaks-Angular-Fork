@@ -1,5 +1,6 @@
 import {Component, Input} from "@angular/core";
 import {NgForm} from "@angular/forms";
+import {LanguageUtils} from "@app/pages/admin/settings/helper-methods/language-utils";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {UtilsService} from "@app/shared/services/utils.service";
 
@@ -10,15 +11,13 @@ import {UtilsService} from "@app/shared/services/utils.service";
 export class Tab4Component {
   @Input() contentForm: NgForm;
 
-  vars: any = {};
-  custom_texts: any = {};
-  default_texts: any = {};
-  custom_texts_selector: any[] = [];
+  vars: {language_to_customize:string, text_to_customize:string,custom_text:string} = {language_to_customize:"", text_to_customize:"",custom_text:""};
+  custom_texts:{[key: string]: string}={}
+  default_texts:{[key: string]: string}={}
+  custom_texts_selector:{key: string; value: string;}[] = [];
   customTextsExist: boolean = false;
+  languageUtils:LanguageUtils
 
-  languages_enabled: any = {};
-  languages_enabled_selector: any[] = [];
-  languages_supported: any = {};
 
   constructor(protected utilsService: UtilsService, protected nodeResolver: NodeResolver) {
   }
@@ -28,25 +27,15 @@ export class Tab4Component {
   }
 
   initLanguages(): void {
-    this.languages_supported = {};
-    this.languages_enabled = {};
-    this.languages_enabled_selector = [];
-    this.nodeResolver.dataModel.languages_supported.forEach((lang: any) => {
-      this.languages_supported[lang.code] = lang;
+    this.languageUtils = new LanguageUtils(this.nodeResolver);
+    this.languageUtils.updateLanguages();
 
-      if (this.nodeResolver.dataModel.languages_enabled.indexOf(lang.code) !== -1) {
-        this.languages_enabled[lang.code] = lang;
-        this.languages_enabled_selector.push(lang);
-      }
-    });
-    this.vars = {
-      "language_to_customize": this.nodeResolver.dataModel.default_language
-    };
-    this.get_l10n(this.vars.language_to_customize);
+    this.vars.language_to_customize = this.nodeResolver.dataModel.default_language
+    this.getl10n(this.vars.language_to_customize);
   }
 
 
-  get_l10n(lang: any): void {
+  getl10n(lang: string): void {
     if (!lang) {
       return;
     }
@@ -76,12 +65,12 @@ export class Tab4Component {
     return Object.keys(this.custom_texts).map(key => ({key}));
   }
 
-  updateCustomText(data: any, lang: any) {
+  updateCustomText(data: {[key: string]: string}, lang: string) {
     this.utilsService.updateAdminL10NResource(data, lang).subscribe(_ => {
     });
   }
 
-  deleteCustomText(dict: any, key: string): void {
+  deleteCustomText(dict: {[key: string]: string;}, key: string): void {
     delete dict[key];
   }
 

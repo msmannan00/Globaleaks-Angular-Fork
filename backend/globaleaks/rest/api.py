@@ -82,8 +82,9 @@ api_spec = [
     (r'/api/whistleblower/submission/attachment', whistleblower.attachment.SubmissionAttachment),
     (r'/api/whistleblower/wbtip', whistleblower.wbtip.WBTipInstance),
     (r'/api/whistleblower/wbtip/comments', whistleblower.wbtip.WBTipCommentCollection),
-    (r'/api/whistleblower/wbtip/wbfiles', whistleblower.attachment.PostSubmissionAttachment),
     (r'/api/whistleblower/wbtip/rfiles/' + uuid_regexp, whistleblower.wbtip.ReceiverFileDownload),
+    (r'/api/whistleblower/wbtip/wbfiles', whistleblower.attachment.PostSubmissionAttachment),
+    (r'/api/whistleblower/wbtip/wbfiles/' + uuid_regexp, whistleblower.wbtip.WhistleblowerFileDownload),
     (r'/api/whistleblower/wbtip/identity', whistleblower.wbtip.WBTipIdentityHandler),
     (r'/api/whistleblower/wbtip/fillform', whistleblower.wbtip.WBTipAdditionalQuestionnaire),
 
@@ -254,10 +255,10 @@ class APIResourceWrapper(Resource):
         elif isinstance(e, errors.GLException):
             pass
         else:
+            e = errors.InternalServerError('Unexpected')
             e.tid = request.tid
             e.url = request.hostname + request.path
             extract_exception_traceback_and_schedule_email(exception)
-            e = errors.InternalServerError('Unexpected')
 
         if isinstance(e, errors.GLException):
           request.setResponseCode(e.status_code)
@@ -333,11 +334,7 @@ class APIResourceWrapper(Resource):
                 tentative_hostname = request.hostname[4:]
 
             if tentative_hostname in State.tenant_hostname_id_map:
-                request.tid = State.tenant_hostname_id_map[tentative_hostname]
-                if State.tenants[request.tid].cache.https_enabled:
-                    request.redirect(b'https://' + tentative_hostname + b'/')
-                else:
-                    request.redirect(b'http://' + tentative_hostname + b'/')
+                request.redirect(b'https://' + tentative_hostname + b'/')
                 return b''
             else:
                 # Fallback on root tenant with error 400
@@ -414,7 +411,8 @@ class APIResourceWrapper(Resource):
 
         if self.handler.root_tenant_or_management_only and \
                 request.tid != 1 and \
-                not self.handler.session.properties.get('management_session', False):
+                  (not self.handler.session or \
+                   not self.handler.session.properties.get('management_session', False)):
             self.handle_exception(errors.ForbiddenOperation, request)
             return b''
 
@@ -477,33 +475,33 @@ class APIResourceWrapper(Resource):
             if request.tid in State.tenants and State.tenants[request.tid].cache.onionservice:
                 request.setHeader(b'Onion-Location', b'http://' + State.tenants[request.tid].cache.onionservice.encode() + request.path)
 
-        if not State.settings.disable_csp:
-            request.setHeader(b'Content-Security-Policy',
-                              b"base-uri 'none';"
-                              b"default-src 'none';"
-                              b"form-action 'none';"
-                              b"frame-ancestors 'none';"
-                              b"sandbox;")
+        request.setHeader(b'Content-Security-Policy',
+                          b"base-uri 'none';"
+                          b"default-src 'none';"
+                          b"form-action 'none';"
+                          b"frame-ancestors 'none';"
+                          b"sandbox;")
 
-            request.setHeader(b"Cross-Origin-Embedder-Policy", "require-corp")
-            request.setHeader(b"Cross-Origin-Opener-Policy", "same-origin")
-            request.setHeader(b"Cross-Origin-Resource-Policy", "same-origin")
+        request.setHeader(b"Cross-Origin-Embedder-Policy", "require-corp")
+        request.setHeader(b"Cross-Origin-Opener-Policy", "same-origin")
+        request.setHeader(b"Cross-Origin-Resource-Policy", "same-origin")
 
-            # Disable features that could be used to deanonymize the user
-            if request.tid in State.tenants and getattr(State.tenants[request.tid], 'microphone', False):
-                request.setHeader(b'Permissions-Policy', b"camera=(),"
-                                                         b"document-domain=(),"
-                                                         b"fullscreen=(),"
-                                                         b"geolocation=()")
-            else:
-                request.setHeader(b'Permissions-Policy', b"camera=(),"
-                                                         b"document-domain=(),"
-                                                         b"fullscreen=(),"
-                                                         b"geolocation=(),"
-                                                         b"microphone=()")
+        # Disable features that could be used to deanonymize the user
+        microphone = False
+        if request.tid in State.tenants and getattr(State.tenants[request.tid], 'microphone', False):
+            microphone = True
 
-            # Prevent old browsers not supporting CSP frame-ancestors directive to includes the platform within an iframe
-            request.setHeader(b'X-Frame-Options', b'deny')
+        request.setHeader(b'Permissions-Policy', b"camera=(),"
+                                                 b"document-domain=(),"
+                                                 b"fullscreen=(),"
+                                                 b"geolocation=(),"
+                                                 b"microphone=(" + (b"self" if microphone else b"") + b"),"
+                                                 b"serial=(),"
+                                                 b"usb=(),"
+                                                 b"web-share=()")
+
+        # Prevent old browsers not supporting CSP frame-ancestors directive to includes the platform within an iframe
+        request.setHeader(b'X-Frame-Options', b'deny')
 
         # Prevent the browsers to implement automatic mime type detection and execution.
         request.setHeader(b'X-Content-Type-Options', b'nosniff')

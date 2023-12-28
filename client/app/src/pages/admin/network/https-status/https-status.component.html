@@ -1,38 +1,26 @@
 <ng-container *ngIf="tlsConfig">
     <div class="info-section">
         <div>
-            <span>{{ 'Status' | translate }}</span>
-            <span *ngIf="tlsConfig.enabled">
-                <span class="badge bg-primary">
-                    <span>{{ 'Enabled' | translate }}</span>
+            <div>
+                <span>{{'Status'|translate}}</span>
+                <span>: </span>
+                <span *ngIf="tlsConfig.enabled">
+                    <span>{{'Enabled'|translate}}</span>
                 </span>
-            </span>
-
-            <span *ngIf="!tlsConfig.enabled" class="badge bg-danger">
-                <span>{{ 'Disabled' | translate }}</span>
-            </span>
+                <span *ngIf="!tlsConfig.enabled">
+                    <span>{{'Disabled'|translate}}</span>
+                </span>
+            </div>
+            <div *ngIf="tlsConfig.acme">
+                <span>{{'Auto - renewal'|translate}}</span>: <span>{{'Enabled'|translate}}</span>
+            </div>
         </div>
-
         <div class="hostname">
             <div *ngIf="tlsConfig.enabled">
-                <span>URL</span><span>:</span>
-                <a href="https://{{networkResolver.dataModel.hostname}}" rel="noreferrer"
-                   target="_blank">https://{{networkResolver.dataModel.hostname}}</a>
+                <span>{{'URL'|translate}}</span>
+                <span>:</span>
+                <a href={{getNetworkResolver()}} rel="noreferrer" target="_blank">https://{{networkResolver.dataModel.hostname}}</a>
             </div>
         </div>
     </div>
-
-    <div>{{ 'Certificate' | translate }}</div>
-    <div>
-        <p><span>{{ 'Issuer' | translate }}:</span> {{tlsConfig.files.cert.issuer }}</p>
-        <p><span>{{ 'Valid until' | translate }}:</span> {{tlsConfig.files.cert.expiration_date | date:'dd-MM-yyyy HH:mm'}}</p>
-        <p *ngIf="tlsConfig.acme">
-            <span>{{ 'Auto-renewal' | translate }}</span>: <span>{{ 'Enabled' | translate }}</span>
-        </p>
-    </div>
-
-    <hr />
-    <button *ngIf="!tlsConfig.enabled" class="btn btn-primary" (click)="toggleCfg()">{{ 'Enable' | translate }}</button>
-    <button *ngIf="tlsConfig.enabled" class="btn btn-danger" (click)="toggleCfg()">{{ 'Disable' | translate }}</button>
-    <button class="btn btn-danger" (click)="resetCfg()">{{ 'Reset' | translate }}</button>
 </ng-container>

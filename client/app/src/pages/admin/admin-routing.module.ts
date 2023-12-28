@@ -42,7 +42,7 @@ const routes: Routes = [
       NodeResolver, PreferenceResolver, UsersResolver
     },
     pathMatch: "full",
-    data: {sidebar: "admin-sidebar", pageTitle: "Home"}
+    data: {sidebar: "admin-sidebar", pageTitle: "Home"},
   },
   {
     path: "preferences",
@@ -51,7 +51,7 @@ const routes: Routes = [
       NodeResolver, PreferenceResolver
     },
     pathMatch: "full",
-    data: {pageTitle: "Preferences"}
+    data: {pageTitle: "Preferences"},
   },
   {
     path: "settings",
@@ -60,14 +60,16 @@ const routes: Routes = [
     },
     loadChildren: () => SettingsModule,
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Settings"},
   },
   {
     path: "sites",
     resolve: {
-      NodeResolver, PreferenceResolver, UsersResolver, JobResolver, TipsResolver, StatuseResolver: StatusResolver
+      NodeResolver, PreferenceResolver, UsersResolver, JobResolver, TipsResolver, QuestionnairesResolver, StatusResolver
     },
     loadChildren: () => SitesModule,
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Sites"},
   },
   {
     path: "users",
@@ -76,14 +78,16 @@ const routes: Routes = [
       NodeResolver, PreferenceResolver, UsersResolver
     },
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Users"},
   },
   {
     path: "questionnaires",
     resolve: {
-      NodeResolver, PreferenceResolver, UsersResolver, QuestionnairesResolver, RedirectsResolver, FieldtemplatesResolver: FieldTemplatesResolver
+      NodeResolver, PreferenceResolver, ContextsResolver, UsersResolver, QuestionnairesResolver, FieldTemplatesResolver
     },
     loadChildren: () => QuestionnairesModule,
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Questionnaires"},
   },
   {
     path: "contexts",
@@ -92,6 +96,7 @@ const routes: Routes = [
       NodeResolver, PreferenceResolver, UsersResolver, QuestionnairesResolver, ContextsResolver
     },
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Channels"},
   },
   {
     path: "casemanagement",
@@ -100,6 +105,7 @@ const routes: Routes = [
       NodeResolver, PreferenceResolver, StatuseResolver: StatusResolver
     },
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Case management"},
   },
   {
     path: "auditlog",
@@ -108,6 +114,7 @@ const routes: Routes = [
     },
     loadChildren: () => AuditLogModule,
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Audit log"},
   },
   {
     path: "notifications",
@@ -116,6 +123,7 @@ const routes: Routes = [
     },
     loadChildren: () => NotificationsModule,
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Notifications"},
   },
   {
     path: "network",
@@ -124,6 +132,7 @@ const routes: Routes = [
     },
     loadChildren: () => NetworkModule,
     pathMatch: "full",
+    data: {sidebar: "admin-sidebar", pageTitle: "Network"},
   }
 ];
 

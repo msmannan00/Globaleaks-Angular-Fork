@@ -3,12 +3,13 @@ import {NgForm} from "@angular/forms";
 import * as Flow from "@flowjs/flow.js";
 import type {FlowFile} from "@flowjs/flow.js";
 import {FlowDirective} from "@flowjs/ngx-flow";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {PreferenceResolver} from "@app/shared/resolvers/preference.resolver";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {Subscription} from "rxjs";
-import {AppConfigService} from "@app/services/app-config.service";
+import {AppConfigService} from "@app/services/root/app-config.service";
+import { preferenceResolverModel } from "@app/models/resolvers/preference-resolver-model";
+import { AdminFile } from "@app/models/component-model/admin-file";
 
 @Component({
   selector: "src-tab2",
@@ -21,12 +22,11 @@ export class Tab2Component implements OnInit {
 
   files: FlowFile[] = [];
   flow: FlowDirective;
-  flowConfig: any = {};
-  autoUploadSubscription: Subscription;
-  preferenceData: any = [];
-  authenticationData: any = [];
+  preferenceData: preferenceResolverModel;
+  authenticationData: AuthenticationService;
+  permissionStatus = false;
 
-  admin_files: any[] = [
+  admin_files:AdminFile[]= [
     {
       "title": "Favicon",
       "varname": "favicon",
@@ -51,7 +51,7 @@ export class Tab2Component implements OnInit {
   }
 
   ngOnInit(): void {
-    this.preferenceData = this.preferenceResolver.dataModel;
+      this.preferenceData = this.preferenceResolver.dataModel;
     this.authenticationData = this.authenticationService;
     this.authenticationData.permissions = {
       can_upload_files: false
@@ -60,6 +60,7 @@ export class Tab2Component implements OnInit {
       can_upload_files: false
     };
     this.updateFiles();
+    this.permissionStatus = this.authenticationData.session.permissions.can_upload_files;
   }
 
   onFileSelected(files: FileList | null) {
@@ -67,7 +68,7 @@ export class Tab2Component implements OnInit {
       const file = files[0];
 
       const flowJsInstance = new Flow({
-        target: "/api/admin/files/custom",
+        target: "api/admin/files/custom",
         speedSmoothingFactor: 0.01,
         singleFile: true,
         allowDuplicateUploads: false,
@@ -79,26 +80,17 @@ export class Tab2Component implements OnInit {
 
       flowJsInstance.on("fileSuccess", (_) => {
         this.appConfigService.reinit(false);
-        this.utilsService.reloadCurrentRoute();
+        this.utilsService.reloadComponent();
       });
-
-      const fileNameParts = file.name.split(".");
-      const fileExtension = fileNameParts.pop();
-      const fileNameWithoutExtension = fileNameParts.join(".");
-      const timestamp = new Date().getTime();
-      const fileNameWithTimestamp = `${fileNameWithoutExtension}_${timestamp}.${fileExtension}`;
-      const modifiedFile = new File([file], fileNameWithTimestamp, {type: file.type});
-
-      flowJsInstance.addFile(modifiedFile);
-      flowJsInstance.upload();
+      this.utilsService.onFlowUpload(flowJsInstance, file)
     }
   }
 
-  delete_file(url: string): void {
+  deleteFile(url: string): void {
     this.utilsService.deleteFile(url).subscribe(
       () => {
         this.updateFiles();
-        this.utilsService.init();
+        this.utilsService.reloadComponent();
       }
     );
   }
@@ -111,27 +103,24 @@ export class Tab2Component implements OnInit {
     );
   }
 
-  togglePermissionUploadFiles(status: any): void {
-
-    this.authenticationData.session.permissions.can_upload_files = !this.authenticationData.session.permissions.can_upload_files;
-    status.checked = this.authenticationData.session.permissions.can_upload_files;
-
+  togglePermissionUploadFiles(): void {
     if (!this.authenticationData.session.permissions.can_upload_files) {
-      this.utilsService.runAdminOperation("enable_user_permission_file_upload", {}, false).subscribe(
-        () => {
+      this.utilsService.runAdminOperation("enable_user_permission_file_upload", {}, false).subscribe({
+        next: (_) => {
           this.authenticationData.session.permissions.can_upload_files = true;
-          status.checked = true;
+          this.permissionStatus = true;
         },
-        () => {
+        error: (_) => {
           this.authenticationData.session.permissions.can_upload_files = false;
-          status.checked = false;
+          this.togglePermissionUploadFiles();
+          this.permissionStatus = false;
         }
-      );
+      });
     } else {
       this.utilsService.runAdminOperation("disable_user_permission_file_upload", {}, false).subscribe(
         () => {
           this.authenticationData.session.permissions.can_upload_files = false;
-          status.checked = false;
+          this.permissionStatus = false;
         }
       );
     }

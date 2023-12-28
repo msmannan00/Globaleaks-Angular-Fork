@@ -34,43 +34,30 @@
               "app/assets"
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.css",
+              "app/css/components/switch.css",
+              "app/css/components/select.css",
+              "app/css/components/date-picker.css",
               "app/css/main.css",
               "app/css/ui-select-bootstrap4-fix.css",
-              "app/css/loader.css",
+              "app/css/components/loader.css",
               "app/css/print.css",
-              "app/css/button.css",
-              "app/css/ng-select.css",
+              "app/css/components/button.css",
+              "app/css/components/ng-select.css",
+              "app/css/bootstrap-fixes.css",
+              "node_modules/ng-multiselect-dropdown/themes/ng-multiselect-dropdown.theme.scss",
+              "node_modules/@ng-select/ng-select/themes/default.theme.css",
               "node_modules/font-awesome/css/font-awesome.css",
               "node_modules/@fortawesome/fontawesome-free/css/fontawesome.css",
-              "node_modules/@fortawesome/fontawesome-free/css/solid.css",
-              "app/assets/lib/css/solid.css",
-              "node_modules/@ng-select/ng-select/themes/default.theme.css",
-              "node_modules/ng-multiselect-dropdown/themes/ng-multiselect-dropdown.theme.scss",
-              "app/css/bootstrap-fixes.css"
-            ],
-            "scripts": [
-              "node_modules/marked/marked.min.js"
+              "app/assets/lib/webfonts/@fontawesome/fontawesome-all.css",
+              "app/assets/lib/webfonts/@fontsource/fontsource-all.css"
             ]
           },
           "configurations": {
             "production": {
-              "budgets": [
-                {
-                  "type": "initial",
-                  "maximumWarning": "5mb",
-                  "maximumError": "5mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "5mb",
-                  "maximumError": "5mb"
-                }
-              ],
-              "extractLicenses": false
+              "extractLicenses": false,
+              "vendorChunk": true
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,

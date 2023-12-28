@@ -1,6 +1,6 @@
 import {Component} from "@angular/core";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {ReceiverTipService} from "@app/services/receiver-tip.service";
+import {ReceiverTipService} from "@app/services/helper/receiver-tip.service";
 import {TipOperationFileIdentityAccessRequestComponent} from "@app/shared/modals/tip-operation-file-identity-access-request/tip-operation-file-identity-access-request.ompoent";
 import {HttpService} from "@app/shared/services/http.service";
 import {UtilsService} from "@app/shared/services/utils.service";
@@ -20,12 +20,12 @@ export class WhistleBlowerIdentityReceiverComponent {
     this.collapsed = !this.collapsed;
   }
 
-  file_identity_access_request() {
-    const modalRef = this.modalService.open(TipOperationFileIdentityAccessRequestComponent);
+  fileIdentityAccessRequest() {
+    const modalRef = this.modalService.open(TipOperationFileIdentityAccessRequestComponent,{backdrop: 'static',keyboard: false});
     modalRef.componentInstance.tip = this.tipService.tip;
   }
 
-  access_identity() {
+  accessIdentity() {
     return this.httpService.accessIdentity(this.tipService.tip.id).subscribe(
       _ => {
         this.utils.reloadCurrentRoute();

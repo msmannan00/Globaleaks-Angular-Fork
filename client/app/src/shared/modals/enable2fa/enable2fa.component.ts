@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {UtilsService} from "@app/shared/services/utils.service";
 import {PreferenceResolver} from "@app/shared/resolvers/preference.resolver";
-import {TwoFactorAuthData} from "@app/services/2fa.data.service";
+import {TwoFactorAuthData} from "@app/services/helper/2fa.data.service";
 
 @Component({
   selector: "src-enable2fa",
@@ -28,7 +28,7 @@ export class Enable2faComponent {
           this.preferenceResolver.dataModel.two_factor = true;
           this.activeModal.dismiss();
         },
-        error: (_: any) => {
+        error: _ => {
           this.utilsService.reloadCurrentRoute();
         }
       }

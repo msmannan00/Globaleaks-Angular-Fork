@@ -1,0 +1,40 @@
+<div data-ng-switch="field.type" class="nested">
+  <span data-ng-if="entry" data-ng-switch-when="checkbox">
+    <div data-ng-repeat="(k, v) in entry">
+      <div data-ng-repeat="option in field.options" data-ng-if="k === option.id && v === true">
+        <i class="fa-solid fa-check-square"></i>
+        <span>{{option.label}}</span>
+      </div>
+    </div>
+  </span>
+
+  <span data-ng-switch-when="voice">
+    <i class="fa-solid fa-file-audio" data-ng-if="Authentication.session.role === 'whistleblower'"></i>
+    <div class="audio-player-wrapper" data-ng-if="Authentication.session.role === 'receiver'" data-ng-init="loadAudioFile(field.id)">
+      <audio data-ng-src="{{audioFiles[field.id]}}" controls class="audio-player"></audio>
+    </div>
+  </span>
+
+  <span data-ng-if="entry['value']" data-ng-switch-when="selectbox|multichoice" data-ng-switch-when-separator="|">
+    <div data-ng-repeat="option in field.options">
+      <span data-ng-if="entry['value'] === option.id">{{option.label}}</span>
+    </div>
+  </span>
+
+  <span data-ng-if="entry['value']" data-ng-switch-when="date">{{entry['value'] | date:'dd-MM-yyyy'}}</span>
+
+  <span data-ng-if="entry['value']" data-ng-switch-when="daterange"><span data-translate>From:</span> {{entry['value'] | split:':':0 | date:'dd-MM-yyyy'}} <span data-translate>To:</span> {{entry['value'] | split:':':1 | date:'dd-MM-yyyy'}}</span>
+
+  <span data-ng-if="entry['value']" data-ng-switch-when="tos">
+    <i data-ng-if="entry['value'] === true" class="fa-solid fa-check-square"></i>
+    <i data-ng-if="entry['value'] === false" class="fa-solid fa-square"></i>
+  </span>
+
+  <span data-ng-if="entry" data-ng-switch-when="fieldgroup">
+    <div data-ng-repeat="field in field.children | orderBy:['y', 'x'] | filter:{ type: '!fileupload'}">
+      <div data-ng-init="fieldAnswers=entry" data-ng-include="'views/partials/tip_field.html'"></div>
+    </div>
+  </span>
+
+  <span data-ng-if="entry['value']" class="entry-text preformatted" data-ng-switch-default>{{entry['value']}}</span>
+</div>

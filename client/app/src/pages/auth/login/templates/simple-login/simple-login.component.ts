@@ -1,5 +1,5 @@
-import {Component, Input} from "@angular/core";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {Component, Input, OnInit} from "@angular/core";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {LoginDataRef} from "@app/pages/auth/login/model/login-model";
 import {NgForm} from "@angular/forms";
 import {AppDataService} from "@app/app-data.service";
@@ -8,7 +8,7 @@ import {AppDataService} from "@app/app-data.service";
   selector: "app-simple-login",
   templateUrl: "./simple-login.component.html",
 })
-export class SimpleLoginComponent {
+export class SimpleLoginComponent implements OnInit{
 
   @Input() loginData: LoginDataRef;
   @Input() loginValidator: NgForm;
@@ -16,4 +16,9 @@ export class SimpleLoginComponent {
   constructor(protected authentication: AuthenticationService, protected appDataService: AppDataService) {
   }
 
+  public ngOnInit(): void {
+    if(this.appDataService.public.receivers.length>0){
+      this.loginData.loginUsername = this.appDataService.public.receivers[0].id
+    }
+  }
 }

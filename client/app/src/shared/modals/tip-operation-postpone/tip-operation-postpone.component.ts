@@ -10,7 +10,7 @@ import {UtilsService} from "@app/shared/services/utils.service";
 export class TipOperationPostponeComponent {
   @Input() args: any;
 
-  request_motivation: any;
+  request_motivation: string;
   model: NgbDateStruct;
   minDate: NgbDateStruct;
   maxDate: NgbDateStruct;
@@ -73,7 +73,7 @@ export class TipOperationPostponeComponent {
     }
   }
 
-  private parseNgbDate(date: any): NgbDateStruct {
+  private parseNgbDate(date: Date): NgbDateStruct {
     const dateObj = new Date(date);
     const year = dateObj.getUTCFullYear();
     const month = dateObj.getUTCMonth() + 1;

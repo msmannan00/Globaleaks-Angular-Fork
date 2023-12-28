@@ -7,31 +7,37 @@ import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {QuestionnairesResolver} from "@app/shared/resolvers/questionnaires.resolver";
 import {UsersResolver} from "@app/shared/resolvers/users.resolver";
 import {UtilsService} from "@app/shared/services/utils.service";
+import {Observable} from "rxjs";
+import {contextResolverModel} from "@app/models/resolvers/context-resolver-model";
+import {questionnaireResolverModel} from "@app/models/resolvers/questionnaire-model";
+import {userResolverModel} from "@app/models/resolvers/user-resolver-model";
+import {nodeResolverModel} from "@app/models/resolvers/node-resolver-model";
 
 @Component({
   selector: "src-context-editor",
   templateUrl: "./context-editor.component.html"
 })
 export class ContextEditorComponent implements OnInit {
-  @Input() contextsData: any[];
-  @Input() context: any;
-  @Input() index: any;
+  @Input() contextsData: contextResolverModel[];
+  @Input() context: contextResolverModel;
+  @Input() index: number;
   @Input() editContext: NgForm;
   @Output() dataToParent = new EventEmitter<string>();
   editing: boolean = false;
   showAdvancedSettings: boolean = false;
   showSelect: boolean = false;
-  questionnairesData: any = [];
-  usersData: any = [];
-  nodeData: any = [];
-  selected = {value: null};
-  adminReceiversById: any;
+  questionnairesData: questionnaireResolverModel[] = [];
+  usersData: userResolverModel[] = [];
+  nodeData: nodeResolverModel;
+  selected = {value: []};
+  adminReceiversById: { [userId: string]: userResolverModel } = {};
 
   constructor(private http: HttpClient, private modalService: NgbModal, protected nodeResolver: NodeResolver, private usersResolver: UsersResolver, private questionnairesResolver: QuestionnairesResolver, private utilsService: UtilsService) {
   }
 
   ngOnInit(): void {
     this.questionnairesData = this.questionnairesResolver.dataModel;
+
     this.usersData = this.usersResolver.dataModel;
     this.nodeData = this.nodeResolver.dataModel;
     this.adminReceiversById = this.utilsService.array_to_map(this.usersResolver.dataModel);
@@ -41,10 +47,7 @@ export class ContextEditorComponent implements OnInit {
     this.editing = !this.editing;
   }
 
-  onReminderChanged() {
-  }
-
-  swap($event: any, index: number, n: number): void {
+  swap($event: Event, index: number, n: number): void {
     $event.stopPropagation();
 
     const target = index + n;
@@ -55,17 +58,17 @@ export class ContextEditorComponent implements OnInit {
     [this.contextsData[index], this.contextsData[target]] =
       [this.contextsData[target], this.contextsData[index]];
 
-    this.http.put("/api/admin/contexts", {
+    this.http.put("api/admin/contexts", {
       operation: "order_elements",
       args: {ids: this.contextsData.map(c => c.id)},
     }).subscribe();
   }
 
-  moveUp(e: any, idx: number): void {
+  moveUp(e: Event, idx: number): void {
     this.swap(e, idx, -1);
   }
 
-  moveDown(e: any, idx: number): void {
+  moveDown(e: Event, idx: number): void {
     this.swap(e, idx, 1);
   }
 
@@ -78,7 +81,7 @@ export class ContextEditorComponent implements OnInit {
     }
   }
 
-  receiverNotSelectedFilter(item: any): boolean {
+  receiverNotSelectedFilter(item: userResolverModel): boolean {
     return this.context.receivers.indexOf(item.id) === -1;
   }
 
@@ -94,31 +97,33 @@ export class ContextEditorComponent implements OnInit {
     this.showSelect = true;
   }
 
-  moveReceiver(rec: any): void {
+  moveReceiver(rec: userResolverModel): void {
     if (rec && this.context.receivers.indexOf(rec.id) === -1) {
       this.context.receivers.push(rec.id);
       this.showSelect = false;
     }
   }
 
-  deleteContext(context: any): void {
-    this.openConfirmableModalDialog(context, "");
+  deleteContext(context: contextResolverModel): void {
+    this.openConfirmableModalDialog(context, "").subscribe();
   }
 
-  openConfirmableModalDialog(arg: any, scope: any): Promise<any> {
+  openConfirmableModalDialog(arg: contextResolverModel, scope: any): Observable<string> {
     scope = !scope ? this : scope;
-    const modalRef = this.modalService.open(DeleteConfirmationComponent);
-    modalRef.componentInstance.arg = arg;
-    modalRef.componentInstance.scope = scope;
-    modalRef.componentInstance.confirmFunction = () => {
-      return this.utilsService.deleteAdminContext(arg.id).subscribe(_ => {
-        this.sendDataToParent();
-      });
-    };
-    return modalRef.result;
+    return new Observable((observer) => {
+      let modalRef = this.modalService.open(DeleteConfirmationComponent,{backdrop: 'static',keyboard: false});
+      modalRef.componentInstance.arg = arg;
+      modalRef.componentInstance.scope = scope;
+      modalRef.componentInstance.confirmFunction = () => {
+        observer.complete()
+        return this.utilsService.deleteAdminContext(arg.id).subscribe(_ => {
+          this.utilsService.deleteResource(this.contextsData,arg);
+        });
+      };
+    });
   }
 
-  save_context(context: any) {
+  saveContext(context: contextResolverModel) {
     if (context.additional_questionnaire_id === null) {
       context.additional_questionnaire_id = "";
     }

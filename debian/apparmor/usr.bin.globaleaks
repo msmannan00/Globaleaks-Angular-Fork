@@ -1,0 +1,56 @@
+#include <tunables/global>
+
+profile usr.bin.globaleaks flags=(attach_disconnected) {
+    #include <abstractions/base>
+    #include <abstractions/nameservice>
+    #include <abstractions/openssl>
+    #include <abstractions/python>
+    #include <abstractions/tor>
+
+    capability setgid,
+    capability setuid,
+    capability fsetid,
+    capability fowner,
+    capability chown,
+    capability dac_override,
+    capability dac_read_search,
+    capability sys_tty_config,
+
+    /etc/ r,
+    /etc/os-release r,
+    /etc/mime.types r,
+
+    @{PROC}/ r,
+    @{PROC}/@{pid}/fd/ r,
+    @{PROC}/@{pid}/status r,
+    @{PROC}/@{pid}/mounts r,
+
+    /usr/bin/ r,
+    /usr/bin/globaleaks r,
+
+    /usr/bin/gpg ix,
+    /usr/bin/tor ix,
+
+    /usr/ r,
+    /usr/share/** r,
+
+    /var/globaleaks/ wr,
+    /var/globaleaks/** lrwk,
+
+    /{run,dev}/shm/ r,
+    /{run,dev}/shm/globaleaks/ rwk,
+    /{run,dev}/shm/globaleaks/** lrwk,
+
+    /{,var/}run/globaleaks.pid rw,
+
+    owner /tmp/** rwkl,
+    owner /var/tmp/** rwkl,
+
+    owner /var/crash/** rwkl,
+
+    # Explicit silent deny rules:
+    deny /bin/uname x,
+    deny /usr/bin/gcc-** x,
+    deny /usr/bin/x86_64-linux-gnu-** x,
+    deny /sbin/ldconfig x,
+}

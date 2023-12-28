@@ -1,16 +1,15 @@
 import {Injectable} from "@angular/core";
-import {Resolve} from "@angular/router";
 import {Observable, of} from "rxjs";
 import {HttpService} from "@app/shared/services/http.service";
-import {AuthenticationService} from "@app/services/authentication.service";
-import {questionnaireResolverModel} from "@app/models/resolvers/questionnaireModel";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
+import {questionnaireResolverModel} from "@app/models/resolvers/questionnaire-model";
 import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: "root"
 })
-export class QuestionnairesResolver implements Resolve<boolean> {
-  dataModel: questionnaireResolverModel = new questionnaireResolverModel();
+export class QuestionnairesResolver  {
+  dataModel: questionnaireResolverModel[];
 
   constructor(private httpService: HttpService, private authenticationService: AuthenticationService) {
   }
@@ -18,7 +17,7 @@ export class QuestionnairesResolver implements Resolve<boolean> {
   resolve(): Observable<boolean> {
     if (this.authenticationService.session.role === "admin") {
       return this.httpService.requestQuestionnairesResource().pipe(
-        map((response: questionnaireResolverModel) => {
+        map((response: questionnaireResolverModel[]) => {
           this.dataModel = response;
           return true;
         })

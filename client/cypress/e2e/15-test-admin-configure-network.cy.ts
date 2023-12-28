@@ -10,16 +10,15 @@ describe("admin configure network", () => {
     cy.get('[name="hostname"]').clear().type("localhost");
     cy.get('button:contains("Save")').first().click();
 
-    cy.waitForLoader();
     cy.get("#HTTPSManualMode").click();
     cy.contains("button", "Generate").click();
     cy.waitForLoader();
     cy.get("#csrGen").click();
-    cy.get('[name="csr_cfg.country"]').type("IT");
-    cy.get('[name="csr_cfg.province"]').type("Milano");
-    cy.get('[name="csr_cfg.city"]').type("Lombardia");
-    cy.get('[name="csr_cfg.company"]').type("GlobaLeaks");
-    cy.get('[name="csr_cfg.email"]').type("admin@globaleaks.org");
+    cy.get('[name="country"]').type("IT");
+    cy.get('[name="province"]').type("Milano");
+    cy.get('[name="city"]').type("Lombardia");
+    cy.get('[name="company"]').type("GlobaLeaks");
+    cy.get('[name="email"]').type("admin@globaleaks.org");
     cy.get("#csrSubmit").click();
 
     cy.get("#deleteKey").click();

@@ -40,7 +40,7 @@ describe("Recipient2 first login", () => {
 
     cy.url().should("include", "/recipient/home");
     cy.get("#PreferencesLink").click();
-    cy.contains("a", "Two").click();
+    cy.contains("a", "Password").click();
     cy.get('[name="changePasswordArgs.current"]').type(Cypress.env("user_password"));
     cy.get('[name="changePasswordArgs.password"]').type(Cypress.env("init_password"));
     cy.get('[name="changePasswordArgs.confirm"]').type(Cypress.env("init_password"));
@@ -52,6 +52,7 @@ describe("Recipient2 first login", () => {
 describe("Custodian first login", () => {
   it("should require password change upon successful authentication", () => {
     cy.login_custodian("Custodian", Cypress.env("init_password"), "#/login", true);
+    cy.waitForLoader()
     cy.get('[name="changePasswordArgs.password"]').type(Cypress.env("user_password"));
     cy.get('[name="changePasswordArgs.confirm"]').type(Cypress.env("user_password"));
     cy.get('button[name="submit"]').click();

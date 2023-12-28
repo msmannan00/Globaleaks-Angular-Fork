@@ -4,25 +4,30 @@ import {DeleteConfirmationComponent} from "@app/shared/modals/delete-confirmatio
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {HttpService} from "@app/shared/services/http.service";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {AppConfigService} from "@app/services/app-config.service";
+import {NgForm} from "@angular/forms";
+import {NodeResolver} from "@app/shared/resolvers/node.resolver";
+import {tenantResolverModel} from "@app/models/resolvers/tenant-resolver-model";
+import {Observable} from "rxjs";
 
 @Component({
   selector: "src-siteslist",
   templateUrl: "./siteslist.component.html"
 })
 export class SiteslistComponent {
-  @Input() tenant: any;
-  @Input() index: any;
+  @Input() editTenant: NgForm;
+  @Input() tenant: tenantResolverModel;
+  @Input() tenants: tenantResolverModel[];
+  @Input() index: number;
   editing = false;
 
-  constructor(private appConfigService: AppConfigService, protected appDataService: AppDataService, private modalService: NgbModal, private httpService: HttpService, private utilsService: UtilsService) {
+  constructor(protected nodeResolver: NodeResolver, protected appDataService: AppDataService, private modalService: NgbModal, private httpService: HttpService, private utilsService: UtilsService) {
   }
 
   toggleActivation(event: Event): void {
     event.stopPropagation();
     this.tenant.active = !this.tenant.active;
 
-    const url = "/api/admin/tenants/" + this.tenant.id;
+    const url = "api/admin/tenants/" + this.tenant.id;
     this.httpService.requestUpdateTenant(url, this.tenant).subscribe(_ => {
     });
   }
@@ -32,15 +37,13 @@ export class SiteslistComponent {
   }
 
   saveTenant() {
-    const url = "/api/admin/tenants/" + this.tenant.id;
-    this.httpService.requestUpdateTenant(url, this.tenant).subscribe(_ => {
-      this.utilsService.reloadCurrentRoute();
-    });
+    const url = "api/admin/tenants/" + this.tenant.id;
+    this.httpService.requestUpdateTenant(url, this.tenant).subscribe(_ => { });
   }
 
-  deleteTenant(event: any, tenant: any) {
+  deleteTenant(event: Event, tenant: tenantResolverModel) {
     event.stopPropagation();
-    this.openConfirmableModalDialog(tenant, "");
+    this.openConfirmableModalDialog(tenant, "").subscribe(_ => { });
   }
 
   configureTenant($event: Event, tid: number): void {
@@ -51,24 +54,26 @@ export class SiteslistComponent {
     });
   }
 
-  openConfirmableModalDialog(arg: any, scope: any): Promise<any> {
+  openConfirmableModalDialog(arg: tenantResolverModel, scope: any): Observable<string> {
     scope = !scope ? this : scope;
-    const modalRef = this.modalService.open(DeleteConfirmationComponent);
-    modalRef.componentInstance.arg = arg;
-    modalRef.componentInstance.scope = scope;
-    modalRef.componentInstance.confirmFunction = () => {
-
-      const url = "/api/admin/tenants/" + arg.id;
-      return this.httpService.requestDeleteTenant(url).subscribe(_ => {
-        this.appConfigService.reinit();
-        this.utilsService.reloadCurrentRoute();
-      });
-    };
-    return modalRef.result;
+    let self = this
+    return new Observable((observer) => {
+      let modalRef = this.modalService.open(DeleteConfirmationComponent,{backdrop: 'static',keyboard: false});
+      modalRef.componentInstance.arg = arg;
+      modalRef.componentInstance.scope = scope;
+      modalRef.componentInstance.confirmFunction = () => {
+        observer.complete()
+        const url = "api/admin/tenants/"+arg.id;
+        return self.httpService.requestDeleteTenant(url).subscribe(_ => {
+          this.utilsService.deleteResource(this.tenants,arg);
+        });
+      };
+    });
   }
-
   toggleEditing(event: Event): void {
     event.stopPropagation();
-    this.editing = !this.editing;
+    if(this.tenant.id !== 1){
+      this.editing = !this.editing;
+    }
   }
 }

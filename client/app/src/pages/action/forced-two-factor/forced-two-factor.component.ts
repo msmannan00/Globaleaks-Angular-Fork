@@ -1,8 +1,8 @@
 import {Component} from "@angular/core";
-import {TwoFactorAuthData} from "@app/services/2fa.data.service";
+import {TwoFactorAuthData} from "@app/services/helper/2fa.data.service";
 import {HttpService} from "@app/shared/services/http.service";
 import {PreferenceResolver} from "@app/shared/resolvers/preference.resolver";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {Router} from "@angular/router";
 
 @Component({
@@ -11,6 +11,8 @@ import {Router} from "@angular/router";
 })
 export class ForcedTwoFactorComponent {
   constructor(protected twoFactorAuthData: TwoFactorAuthData, private httpService: HttpService, private preferenceResolver: PreferenceResolver, private authenticationService: AuthenticationService, private router: Router) {
+    this.twoFactorAuthData.totp.secret = ""
+    this.twoFactorAuthData.totp.token = ""
   }
 
   enable2FA() {
@@ -28,7 +30,7 @@ export class ForcedTwoFactorComponent {
         next: () => {
           this.preferenceResolver.dataModel.two_factor = true;
           this.authenticationService.session.two_factor = true;
-          this.router.navigate([this.authenticationService.session.homepage]);
+          this.router.navigate([this.authenticationService.session.homepage]).then();
         }
       }
     );

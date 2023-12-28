@@ -5,8 +5,8 @@ import {Pipe, PipeTransform} from "@angular/core";
 })
 export class ByteFmtPipe implements PipeTransform {
 
-  private compared: any;
-  isNumber = (value: any): boolean => typeof value === "number";
+  private compared: [{ str: string; val: number; }];
+  isNumber = (value: string|number): boolean => typeof value === "number";
   convertToDecimal = (num: number, decimal: number): number => {
     return Math.round(num * Math.pow(10, decimal)) / (Math.pow(10, decimal));
   };
@@ -18,7 +18,7 @@ export class ByteFmtPipe implements PipeTransform {
     });
   }
 
-  transform(bytes: number, decimal: any): string {
+  transform(bytes: number, decimal: number): string {
     if (this.isNumber(decimal) && isFinite(decimal) && decimal % 1 === 0 && decimal >= 0 &&
       this.isNumber(bytes) && isFinite(bytes)) {
       let i = 0;

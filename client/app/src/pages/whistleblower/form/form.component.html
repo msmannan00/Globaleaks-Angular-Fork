@@ -1,4 +1,4 @@
-<div *ngFor="let row of rows;let fieldRow = index" class="row" >
+<div *ngFor="let row of rows;let fieldRow = index" class="row">
     <ng-container *ngFor="let field of row | orderBy:'x' let fieldCol = index">
         <ng-container *ngIf="field.enabled">
             <div [ngClass]="fieldUtilitiesService.getClass(field, row.length)">

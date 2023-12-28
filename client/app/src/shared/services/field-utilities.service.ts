@@ -1,25 +1,34 @@
 import {Injectable} from "@angular/core";
+import {Option, WhistleblowerIdentity} from "@app/models/app/shared-public-model";
+import {ParsedFields} from "@app/models/component-model/parsedFields";
+import {Answers} from "@app/models/reciever/reciever-tip-data";
+import {Step} from "@app/models/resolvers/questionnaire-model";
+import {Children} from "@app/models/whistleblower/wb-tip-data";
 import {Constants} from "@app/shared/constants/constants";
 
 @Injectable({
   providedIn: "root"
 })
 export class FieldUtilitiesService {
-  parseQuestionnaire(questionnaire: any, parsedFields: any) {
+
+  constructor() {
+  }
+
+  parseQuestionnaire(questionnaire: any, parsedFields: ParsedFields) {
     const self = this;
 
-    questionnaire.steps.forEach(function (step: any) {
+    questionnaire.steps.forEach(function (step: Step) {
       parsedFields = self.parseFields(step.children, parsedFields);
     });
 
     return parsedFields;
   }
 
-  underscore(s: any) {
+  underscore(s: string) {
     return s.replace(new RegExp("-", "g"), "_");
   }
 
-  fieldFormName(id: any) {
+  fieldFormName(id: string) {
     return "fieldForm_" + this.underscore(id);
   }
 
@@ -81,11 +90,11 @@ export class FieldUtilitiesService {
     return r;
   }
 
-  splitRows(fields: any) {
+  splitRows(fields: Children[]) {
     const rows: any = [];
-    let y: any = null;
+    let y: number|null = null;
 
-    fields.forEach(function (f: any) {
+    fields.forEach(function (f: Children) {
       if (y !== f.y) {
         y = f.y;
         rows.push([]);
@@ -122,7 +131,7 @@ export class FieldUtilitiesService {
       }
     } else if (field.type === "fieldgroup") {
       field.children.forEach(function (field: any) {
-        entry[field.id].forEach(function (entry: any) {
+        entry[field.id]?.forEach(function (entry: any) {
           self.calculateScore(scope, field, entry);
         });
       });
@@ -131,13 +140,14 @@ export class FieldUtilitiesService {
     }
 
     const score = scope.points_to_sum * scope.points_to_mul;
-
-    if (score < scope.context.score_threshold_medium) {
-      scope.score = 1;
-    } else if (score < scope.context.score_threshold_high) {
-      scope.score = 2;
-    } else {
-      scope.score = 3;
+    if (scope.context) {
+      if (score < scope.context.score_threshold_medium) {
+        scope.score = 1;
+      } else if (score < scope.context.score_threshold_high) {
+        scope.score = 2;
+      } else {
+        scope.score = 3;
+      }
     }
   }
 
@@ -170,8 +180,8 @@ export class FieldUtilitiesService {
         return;
       }
 
-      if (scope.appDataService.public.node.enable_scoring_system) {
-        scope.answers[field.id].forEach(function (entry: any) {
+      if (scope.appDataService?.public.node.enable_scoring_system) {
+        scope.answers[field.id]?.forEach(function (entry: any) {
           localscope.calculateScore(scope, field, entry);
         });
       }
@@ -179,7 +189,6 @@ export class FieldUtilitiesService {
       for (i = 0; i < answers[field.id].length; i++) {
         entry = answers[field.id][i];
 
-        /* Block related to updating required status */
         if (["inputbox", "textarea"].indexOf(field.type) > -1) {
           entry.required_status = (field.required || field.attrs.min_len.value > 0) && !entry["value"];
         } else if (field.type === "checkbox") {
@@ -200,7 +209,6 @@ export class FieldUtilitiesService {
           entry.required_status = field.required && !entry["value"];
         }
 
-        /* Block related to evaluate options */
         if (["checkbox", "selectbox", "multichoice"].indexOf(field.type) > -1) {
           for (j = 0; j < field.options.length; j++) {
             option = field.options[j];
@@ -242,7 +250,7 @@ export class FieldUtilitiesService {
     }
 
     if (scope.context) {
-      scope.submission.setContextReceivers(scope.context.id);
+      scope.submissionService.setContextReceivers(scope.context.id);
     }
 
     const localscope = this;
@@ -253,13 +261,13 @@ export class FieldUtilitiesService {
     });
 
     if (scope.context) {
-      scope.submission._submission.score = scope.score;
-      scope.submission.blocked = scope.block_submission;
+      scope.submissionService.submission.score = scope.score;
+      scope.submissionService.blocked = scope.block_submission;
     }
   }
 
 
-  isFieldTriggered(parent: any, field: any, answers: any, score: any) {
+  isFieldTriggered(parent: any, field: any, answers: Answers|WhistleblowerIdentity, score: number) {
     let count = 0;
     let i;
 
@@ -285,7 +293,6 @@ export class FieldUtilitiesService {
         continue;
       }
 
-      // Check if triggering field is in answers object
       if (trigger.option === answers_field.value ||
         Object.prototype.hasOwnProperty.call(answers_field, trigger.option) && answers_field[trigger.option]) {
         if (trigger.sufficient) {
@@ -315,7 +322,7 @@ export class FieldUtilitiesService {
     return parsedFields;
   }
 
-  parseField(field: any, parsedFields: any) {
+  parseField(field: any, parsedFields: ParsedFields) {
     const self = this;
 
     if (!Object.keys(parsedFields).length) {
@@ -327,7 +334,7 @@ export class FieldUtilitiesService {
     if (["checkbox", "selectbox", "multichoice"].indexOf(field.type) > -1) {
       parsedFields.fields_by_id[field.id] = field;
       parsedFields.fields.push(field);
-      field.options.forEach(function (option: any) {
+      field.options.forEach(function (option: Option) {
         parsedFields.options_by_id[option.id] = option;
       });
 
@@ -338,9 +345,5 @@ export class FieldUtilitiesService {
     }
 
     return parsedFields;
-  }
-
-
-  constructor() {
   }
 }

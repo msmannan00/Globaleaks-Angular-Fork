@@ -1,10 +1,10 @@
-<div class="modal-header">
+<div class="modal-header justify-content-end">
     <button type="button" class="close btn" (click)="cancel()" [attr.aria-label]="'Close' | translate">
         <i class="fa-solid fa-times"></i>
     </button>
 </div>
 <div class="modal-body">
-    <markdown class="disclaimer-text" [data]="nodeData.disclaimer_text | stripHtml"></markdown>
+    <markdown class="disclaimer-text" [data]="appDataService.public.node.disclaimer_text | stripHtml"></markdown>
 </div>
 <div class="modal-footer">
     <button (click)="confirm()" class="btn btn-primary">{{ 'Proceed' | translate }}</button>

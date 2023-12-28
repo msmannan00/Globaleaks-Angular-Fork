@@ -1,15 +1,14 @@
 import {Injectable} from "@angular/core";
-import {Resolve} from "@angular/router";
 import {Observable, of} from "rxjs";
 import {HttpService} from "@app/shared/services/http.service";
-import {AuthenticationService} from "@app/services/authentication.service";
-import {tipsResolverModel} from "@app/models/resolvers/tipsResolverModel";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
+import {tipsResolverModel} from "@app/models/resolvers/tips-resolver-model";
 import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: "root"
 })
-export class TipsResolver implements Resolve<boolean> {
+export class TipsResolver  {
   dataModel: tipsResolverModel = new tipsResolverModel();
 
   constructor(private httpService: HttpService, private authenticationService: AuthenticationService) {

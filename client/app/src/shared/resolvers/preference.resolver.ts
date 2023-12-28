@@ -1,15 +1,15 @@
 import {Injectable} from "@angular/core";
-import {Resolve, Router} from "@angular/router";
+import { Router } from "@angular/router";
 import {Observable, of} from "rxjs";
 import {HttpService} from "@app/shared/services/http.service";
-import {preferenceResolverModel} from "@app/models/resolvers/preferenceResolverModel";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {preferenceResolverModel} from "@app/models/resolvers/preference-resolver-model";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {map} from "rxjs/operators";
 
 @Injectable({
   providedIn: "root"
 })
-export class PreferenceResolver implements Resolve<boolean> {
+export class PreferenceResolver  {
   dataModel: preferenceResolverModel = new preferenceResolverModel();
 
   constructor(private router: Router, private httpService: HttpService, private authenticationService: AuthenticationService) {
@@ -21,9 +21,9 @@ export class PreferenceResolver implements Resolve<boolean> {
         map((response: preferenceResolverModel) => {
           this.dataModel = response;
           if (this.dataModel.password_change_needed) {
-            this.router.navigate(["/action/forcedpasswordchange"]);
+            this.router.navigate(["/action/forcedpasswordchange"]).then();
           } else if (this.dataModel.require_two_factor) {
-            this.router.navigate(["/action/forcedtwofactor"]);
+            this.router.navigate(["/action/forcedtwofactor"]).then();
           }
           return true;
         })

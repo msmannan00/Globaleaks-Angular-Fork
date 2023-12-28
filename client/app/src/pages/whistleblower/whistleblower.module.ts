@@ -1,5 +1,5 @@
 import {NgModule} from "@angular/core";
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgOptimizedImage} from "@angular/common";
 import {HomepageComponent} from "@app/pages/whistleblower/homepage/homepage.component";
 import {TranslateModule} from "@ngx-translate/core";
 import {SharedModule} from "@app/shared.module";
@@ -20,7 +20,7 @@ import {FormFieldInputComponent} from "@app/pages/whistleblower/form-field-input
 import {WhistleblowerIdentityFieldComponent} from "./fields/whistleblower-identity-field/whistleblower-identity-field.component";
 import {NgSelectModule} from "@ng-select/ng-select";
 import {NgbInputDatepicker} from "@ng-bootstrap/ng-bootstrap";
-import {ReceiptComponent} from "./receipt/receipt.component";
+import {ReceiptComponent} from "@app/pages/whistleblower/receipt/receipt.component";
 import {TipAdditionalQuestionnaireFormComponent} from "@app/shared/modals/tip-additional-questionnaire-form/tip-additional-questionnaire-form.component";
 
 
@@ -50,16 +50,17 @@ import {TipAdditionalQuestionnaireFormComponent} from "@app/shared/modals/tip-ad
     WhistleblowerIdentityFieldComponent,
     ReceiptComponent
   ],
-  imports: [
-    CommonModule,
-    TranslateModule,
-    SharedModule,
-    MarkdownModule,
-    ReactiveFormsModule,
-    FormsModule,
-    NgSelectModule,
-    NgbInputDatepicker,
-  ]
+    imports: [
+        CommonModule,
+        TranslateModule,
+        SharedModule,
+        MarkdownModule,
+        ReactiveFormsModule,
+        FormsModule,
+        NgSelectModule,
+        NgbInputDatepicker,
+        NgOptimizedImage,
+    ]
 })
 export class WhistleblowerModule {
 }

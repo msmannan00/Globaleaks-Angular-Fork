@@ -1,5 +1,6 @@
 import {Component} from "@angular/core";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AppDataService} from "@app/app-data.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 
 @Component({
@@ -7,9 +8,9 @@ import {UtilsService} from "@app/shared/services/utils.service";
   templateUrl: "./password-reset.component.html"
 })
 export class PasswordResetComponent {
-  username: any = undefined;
+  username: string | undefined = undefined;
 
-  constructor(private authenticationService: AuthenticationService, protected utilsService: UtilsService) {
+  constructor(private authenticationService: AuthenticationService, protected utilsService: UtilsService, protected appDataService: AppDataService) {
   }
 
   submitRequest() {

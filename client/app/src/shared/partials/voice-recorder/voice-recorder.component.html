@@ -1,18 +1,15 @@
-<div class="audio-box">
-    <ng-container #flowAdvanced="flow"
-        [flowConfig]="{target: fileUploadUrl, speedSmoothingFactor:0.01 , singleFile:(field !== undefined && !field.multi_entry), allowDuplicateUploads:false, testChunks:false, permanentErrors : [ 500, 501 ], headers : {'X-Session':authenticationService.session.id}}"></ng-container>
+<div class="audio-box" *ngIf="authenticationService.session">
     <div class="row">
         <div class="col-md-6">
-            <button class="btn" [ngClass]="{'text-secondary': !activeButton, 'text-danger': activeButton === 'record' }"
-                [disabled]="isRecording" (click)="triggerRecording(field.id)">
+            <button class="btn" [ngClass]="{'text-secondary': !activeButton, 'text-danger': activeButton === 'record' }" [disabled]="isRecording || uploads[fileInput]?.files.length" (click)="triggerRecording(field.id)">
                 <i class="fas fa-microphone"></i>
             </button>
-            <button class="btn" *ngIf="activeButton === 'record'" (click)="stopRecording()">
+            <button class="btn" *ngIf="activeButton === 'record'" (click)="onStop()">
                 <i class="fas fa-stop"></i>
             </button>
         </div>
-        <div class="col-md-6 text-right">
-            <button class="btn text-danger blink" *ngIf="activeButton === 'record'">
+        <div class="col-md-6 text-end">
+            <button class="btn text-danger" [ngClass]="{'blink': activeButton === 'record'}" *ngIf="activeButton === 'record'">
                 <i class="fas fa-circle-dot"></i>
             </button>
             <button class="btn text-danger" *ngIf="!isRecording && seconds" (click)="deleteRecording()">
@@ -22,21 +19,17 @@
     </div>
     <div class="row">
         <div class="col-md-12">
-            <input class="inputelem d-none" [id]="'customFile-' + fileInput" [(ngModel)]="_fakeModel" #uploader flowButton [flow]="flowAdvanced.flowJs"
-                   [required]="field && field.required" [name]="'input-' + entryIndex"
-                   type="file" />
-            <div [id]="fieldEntry + '-audio'" class="audio-player-wrapper"
-                [ngClass]="{ 'disabled': isRecording || seconds < field.attrs.min_len }">
+            <input class="inputelem d-none" [id]="'customFile-' + fileInput" [(ngModel)]="_fakeModel" #uploader [required]="field && field.required" [name]="'input-' + entryIndex" type="file" />
+            <div [id]="fieldEntry + '-audio'" class="audio-player-wrapper" [ngClass]="{ 'disabled': isRecording || seconds < field.attrs.min_len }">
                 <audio *ngIf="audioPlayer" [src]="audioPlayer" controls class="audio-player"></audio>
             </div>
         </div>
     </div>
     <div class="row" *ngIf="seconds > 0">
-        <div class="col-md-12 text-right">
+        <div class="col-md-12 text-end">
             <div class="btn" [ngClass]="{'text-danger': seconds < field.attrs.min_len.value}">
                 {{ seconds }}/{{ field.attrs.max_len.value }}
             </div>
         </div>
     </div>
-
 </div>

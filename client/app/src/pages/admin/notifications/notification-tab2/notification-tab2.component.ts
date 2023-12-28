@@ -1,5 +1,6 @@
 import {Component, Input, OnInit} from "@angular/core";
 import {NgForm} from "@angular/forms";
+import {notificationResolverModel} from "@app/models/resolvers/notification-resolver-model";
 import {NotificationsResolver} from "@app/shared/resolvers/notifications.resolver";
 import {UtilsService} from "@app/shared/services/utils.service";
 
@@ -9,17 +10,17 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class NotificationTab2Component implements OnInit {
   @Input() notificationForm: NgForm;
-  template: any;
-  notificationData: any = [];
+  template: string;
+  notificationData: notificationResolverModel;
 
   constructor(private notificationResolver: NotificationsResolver, private utilsService: UtilsService) {
   }
 
   ngOnInit(): void {
-    this.notificationData = this.notificationResolver.dataModel;
+      this.notificationData = this.notificationResolver.dataModel;
   }
 
-  updateNotification(notification: any) {
+  updateNotification(notification:  notificationResolverModel) {
     this.utilsService.updateAdminNotification(notification).subscribe();
   }
 }

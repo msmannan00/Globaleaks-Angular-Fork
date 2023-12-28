@@ -1,18 +1,20 @@
-export interface Root {
+import {Step} from "@app/models/app/shared-public-model";
+
+export class Root {
   node: Node;
   questionnaires: Questionnaire[];
   submission_statuses: Status[];
-  receivers: any[];
+  receivers: Receiver[];
   contexts: Context[];
 }
 
-export interface Node {
-  viewer: any;
+export class Node {
+  viewer: boolean;
   acme: boolean;
   timezone: number;
   allow_indexing: boolean;
   adminonly: boolean;
-  pgp: any;
+  pgp: boolean;
   custom_support_url: string;
   disable_admin_notification: boolean;
   disable_receiver_notification: boolean;
@@ -21,12 +23,12 @@ export interface Node {
   default_questionnaire: string;
   description: string;
   disable_privacy_badge: boolean;
-  disable_submissions: boolean;
+  disable_submissions: boolean = false;
   enable_custom_privacy_badge: boolean;
   enable_scoring_system: boolean;
   enable_signup: boolean;
   hostname: string;
-  https_whistleblower: boolean;
+  https_whistleblower: boolean = false;
   maximum_filesize: number;
   mode: string;
   name: string;
@@ -43,6 +45,7 @@ export interface Node {
   disclaimer_text: string;
   footer: string;
   header_title_homepage: string;
+  footer_whistleblowing_policy:string;
   presentation: string;
   signup_tos1_checkbox_label: string;
   signup_tos1_text: string;
@@ -56,9 +59,13 @@ export interface Node {
   languages_enabled: string[];
   languages_supported: LanguagesSupported[];
   script: boolean;
-  css: any;
-  favicon: any;
-  logo: any;
+  css: string[];
+  favicon: string[];
+  logo: string[];
+  footer_accessibility_declaration: string;
+  footer_privacy_policy: string;
+  user_privacy_policy_text:string;
+  user_privacy_policy_url:string;
 }
 
 export interface LanguagesSupported {
@@ -74,103 +81,11 @@ export interface Questionnaire {
   steps: Step[];
 }
 
-export interface Step {
-  id: string;
-  questionnaire_id: string;
-  order: number;
-  triggered_by_score: number;
-  triggered_by_options: any[];
-  children: Children[];
-  label: string;
-  description: string;
-}
-
-export interface Children {
-  id: string;
-  instance: string;
-  editable: boolean;
-  type: string;
-  template_id: string;
-  template_override_id: string;
-  step_id: string;
-  fieldgroup_id: string;
-  multi_entry: boolean;
-  required: boolean;
-  preview: boolean;
-  attrs: Attrs;
-  x: number;
-  y: number;
-  width: number;
-  triggered_by_score: number;
-  triggered_by_options: TriggeredByOption[];
-  options: Option[];
-  children: any[];
-  label: string;
-  description: string;
-  hint: string;
-  placeholder: string;
-}
-
-export interface Attrs {
-  input_validation?: InputValidation;
-  max_len?: MaxLen;
-  min_len?: MinLen;
-  regexp?: Regexp;
-  display_alphabetically?: DisplayAlphabetically;
-}
-
-export interface InputValidation {
-  name: string;
-  type: string;
-  value: string;
-}
-
-export interface MaxLen {
-  name: string;
-  type: string;
-  value: string;
-}
-
-export interface MinLen {
-  name: string;
-  type: string;
-  value: string;
-}
-
-export interface Regexp {
-  name: string;
-  type: string;
-  value: string;
-}
-
-export interface DisplayAlphabetically {
-  name: string;
-  type: string;
-  value: boolean;
-}
-
-export interface TriggeredByOption {
-  field: string;
-  option: string;
-  sufficient: boolean;
-}
-
-export interface Option {
-  id: string;
-  order: number;
-  block_submission: boolean;
-  score_points: number;
-  score_type: string;
-  trigger_receiver: any[];
-  hint1: string;
-  hint2: string;
-  label: string;
-}
-
 export interface Status {
   id: string;
   order: number;
-  substatuses: any[];
+  system_defined:boolean;
+  substatuses: Substatus[];
   label: string;
 }
 
@@ -198,8 +113,23 @@ export interface Context {
   show_steps_navigation_interface: boolean;
   questionnaire_id: string;
   additional_questionnaire_id: string;
-  receivers: any[];
+  receivers: Receiver[];
   picture: boolean;
   name: string;
   description: string;
+}
+
+export interface Receiver {
+  id: string;
+  name: string;
+  forcefully_selected: boolean;
+  picture: boolean;
+  description: string;
+}
+
+export interface Substatus {
+  id: string;
+  submissionstatus_id: string;
+  order: number;
+  label: string;
 }

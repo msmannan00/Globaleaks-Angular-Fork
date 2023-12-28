@@ -1,29 +1,5 @@
 {
-  "/api": {
-    "target": "https://localhost:8443",
-    "secure": false
-  },
-  "/api/recipient": {
-    "target": "https://localhost:8443",
-    "secure": false
-  },
-  "/recipient": {
-    "target": "https://localhost:8443",
-    "secure": false
-  },
-  "/data/l10n": {
-    "target": "https://localhost:8443",
-    "secure": false
-  },
-  "/l10n": {
-    "target": "https://localhost:8443",
-    "secure": false
-  },
-  "/license.txt": {
-    "target": "https://localhost:8443",
-    "secure": false
-  },
-  "/data/logo.png": {
+  "*": {
     "target": "https://localhost:8443",
     "secure": false
   }

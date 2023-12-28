@@ -1,18 +1,19 @@
-import {Component, ElementRef, Input, OnDestroy, ViewChild} from "@angular/core";
+import {Component, ElementRef, Input, ViewChild} from "@angular/core";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import * as Flow from "@flowjs/flow.js";
-import {AppConfigService} from "@app/services/app-config.service";
+import {AppConfigService} from "@app/services/root/app-config.service";
 import {AppDataService} from "@app/app-data.service";
+import { AdminFile } from "@app/models/component-model/admin-file";
 
 @Component({
   selector: "src-admin-file",
   templateUrl: "./admin-file.component.html"
 })
-export class AdminFileComponent implements OnDestroy {
-  @Input() adminFile: any;
-  nodeData: any = [];
+export class AdminFileComponent {
+  @Input() adminFile: AdminFile;
+  nodeData:{[key:string]:string[]|boolean}={};
   @ViewChild("uploader") uploaderElementRef!: ElementRef<HTMLInputElement>;
 
   constructor(protected node: NodeResolver, protected appConfigService: AppConfigService, protected appDataService: AppDataService, protected utilsService: UtilsService, protected authenticationService: AuthenticationService) {
@@ -43,24 +44,11 @@ export class AdminFileComponent implements OnDestroy {
         this.appConfigService.reinit(false);
         this.utilsService.reloadCurrentRoute();
       });
-
-      const fileNameParts = file.name.split(".");
-      const fileExtension = fileNameParts.pop();
-      const fileNameWithoutExtension = fileNameParts.join(".");
-      const timestamp = new Date().getTime();
-      const fileNameWithTimestamp = `${fileNameWithoutExtension}_${timestamp}.${fileExtension}`;
-      const modifiedFile = new File([file], fileNameWithTimestamp, {type: file.type});
-
-      flowJsInstance.addFile(modifiedFile);
-      flowJsInstance.upload();
-
+      this.utilsService.onFlowUpload(flowJsInstance, file)
     }
   }
 
-  reload() {
-  }
-
-  delete_file(url: string): void {
+  deleteFile(url: string): void {
     this.utilsService.deleteFile(url).subscribe(
       () => {
         this.appConfigService.reinit(false);
@@ -68,8 +56,4 @@ export class AdminFileComponent implements OnDestroy {
       }
     );
   }
-
-  ngOnDestroy() {
-  }
-
 }

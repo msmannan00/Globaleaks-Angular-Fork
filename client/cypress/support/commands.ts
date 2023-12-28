@@ -3,7 +3,8 @@ import {PageIdleDetector} from "./PageIdleDetector";
 declare global {
   namespace Cypress {
     interface Chainable {
-      waitForLoader: () => void;
+      // @ts-ignore
+      waitForLoader: (waitForHTTP: boolean = true) => void;
       waitForPageIdle: () => void;
       logout: () => void;
       takeScreenshot: (filename: string, timeout?: number, locator?: any) => void;
@@ -103,7 +104,7 @@ Cypress.Commands.add("waitUntilClickable", (locator: string, timeout?: number) =
   cy.get(locator).click({timeout: t});
 });
 
-Cypress.Commands.add("waitForLoader", () => {
+Cypress.Commands.add("waitForLoader", (waitForHTTP: boolean = true) => {
   cy.intercept("**").as("httpRequests");
 
   cy.get("#PageOverlay", {timeout: 1000, log: false})
@@ -125,7 +126,9 @@ Cypress.Commands.add("waitForLoader", () => {
       });
     })
     .then(() => {
-      cy.wait("@httpRequests");
+      if(waitForHTTP){
+        cy.wait("@httpRequests");
+      }
     });
 });
 

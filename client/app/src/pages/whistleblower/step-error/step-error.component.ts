@@ -1,6 +1,7 @@
-import {Component, EventEmitter, Input, Output} from "@angular/core";
-import {SubmissionService} from "@app/services/submission.service";
+import {Component, EventEmitter, Input, Output, QueryList} from "@angular/core";
+import {SubmissionService} from "@app/services/helper/submission.service";
 import {FormArray, FormGroup, NgForm} from "@angular/forms";
+import {Field} from "@app/models/resolvers/field-template-model";
 
 @Component({
   selector: "src-step-error",
@@ -12,8 +13,8 @@ export class StepErrorComponent {
   @Input() displayStepErrors: Function;
   @Input() stepForm: Function;
   @Input() submission: SubmissionService;
-  @Input() stepForms: any;
-  @Input() field_id_map: any;
+  @Input() stepForms: QueryList<NgForm>;
+  @Input() field_id_map: { [key: string]: Field };
   @Output() goToStep: EventEmitter<any> = new EventEmitter();
 
   getInnerGroupErrors(form: NgForm): string[] {

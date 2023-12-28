@@ -1,6 +1,5 @@
 import {NgModule} from "@angular/core";
 import {CommonModule} from "@angular/common";
-
 import {NotificationsRoutingModule} from "@app/pages/admin/notifications/notifications-routing.module";
 import {NotificationsComponent} from "@app/pages/admin/notifications/notifications.component";
 import {FormsModule} from "@angular/forms";

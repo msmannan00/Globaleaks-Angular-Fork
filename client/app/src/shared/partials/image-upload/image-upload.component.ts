@@ -2,7 +2,7 @@ import {HttpClient} from "@angular/common/http";
 import {AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild} from "@angular/core";
 import {FlowDirective} from "@flowjs/ngx-flow";
 import {Subscription} from "rxjs";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 
 @Component({
   selector: "src-image-upload",
@@ -13,18 +13,19 @@ export class ImageUploadComponent implements AfterViewInit, OnDestroy {
   flow: FlowDirective;
   @ViewChild("uploader") uploaderElementRef!: ElementRef<HTMLInputElement>;
 
-  @Input() imageUploadModel: any;
+  @Input() imageUploadModel: { [key: string]: any };
   @Input() imageUploadModelAttr: string;
   @Input() imageUploadId: string;
-  imageUploadObj: any = {
-    files: [],
-  };
+  imageUploadObj: {files:[]} = {files:[]};
   autoUploadSubscription: Subscription;
+  filemodel:any;
+  currentTImestamp = new Date().getTime();
 
   constructor(private http: HttpClient, protected authenticationService: AuthenticationService) {
   }
 
   ngOnInit() {
+    this.filemodel = this.imageUploadModel[this.imageUploadModelAttr];
   }
 
   ngAfterViewInit() {
@@ -39,8 +40,8 @@ export class ImageUploadComponent implements AfterViewInit, OnDestroy {
     if (files && files.length > 0) {
       const file = files[0];
       const fileNameParts = file.name.split(".");
-      const fileExtension = fileNameParts.pop(); // Remove the file extension
-      const fileNameWithoutExtension = fileNameParts.join("."); // Join the rest of the file name without extension
+      const fileExtension = fileNameParts.pop();
+      const fileNameWithoutExtension = fileNameParts.join(".");
       const timestamp = new Date().getTime();
       const fileNameWithTimestamp = `${fileNameWithoutExtension}_${timestamp}.${fileExtension}`;
       const modifiedFile = new File([file], fileNameWithTimestamp, {type: file.type});
@@ -48,6 +49,8 @@ export class ImageUploadComponent implements AfterViewInit, OnDestroy {
 
       flowJsInstance.addFile(modifiedFile);
       flowJsInstance.upload();
+      this.currentTImestamp = new Date().getTime();
+      this.filemodel = modifiedFile;
     }
   }
 
@@ -61,12 +64,18 @@ export class ImageUploadComponent implements AfterViewInit, OnDestroy {
 
   deletePicture() {
     this.http
-      .delete("/api/admin/files/" + this.imageUploadId)
+      .delete("api/admin/files/" + this.imageUploadId)
       .subscribe(() => {
         if (this.imageUploadModel) {
           this.imageUploadModel[this.imageUploadModelAttr] = "";
         }
         this.imageUploadObj.files = [];
+        this.filemodel = ""
       });
   }
+
+  getCurrentTimestamp(): number {
+    return this.currentTImestamp;
+  }
+
 }

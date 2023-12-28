@@ -1,6 +1,7 @@
 import {Component, Input} from "@angular/core";
 import {AppDataService} from "@app/app-data.service";
 import {ControlContainer, NgForm} from "@angular/forms";
+import {Signup} from "@app/models/component-model/signup";
 
 @Component({
   selector: "src-tos",
@@ -8,7 +9,8 @@ import {ControlContainer, NgForm} from "@angular/forms";
   viewProviders: [{provide: ControlContainer, useExisting: NgForm}]
 })
 export class TosComponent {
-  @Input() signup: any;
+  @Input() signup: Signup;
+  @Input() signupform: NgForm;
 
   constructor(protected appDataService: AppDataService) {
   }

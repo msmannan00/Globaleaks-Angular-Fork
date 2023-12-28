@@ -2,7 +2,7 @@ import {Component} from "@angular/core";
 import {UtilsService} from "@app/shared/services/utils.service";
 import {PreferenceResolver} from "@app/shared/resolvers/preference.resolver";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {TwoFactorAuthData} from "@app/services/2fa.data.service";
+import {TwoFactorAuthData} from "@app/services/helper/2fa.data.service";
 
 @Component({
   selector: "src-enable-2fa",

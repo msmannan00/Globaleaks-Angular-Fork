@@ -1,6 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import sha256, {} from "fast-sha256";
+import {CryptoService} from "@app/shared/services/crypto.service";
+import { Observable, from, switchMap } from "rxjs";
 
 @Injectable({
   providedIn: "root"
@@ -8,94 +9,28 @@ import sha256, {} from "fast-sha256";
 export class TokenResource {
 
   private baseUrl = "api/token/:id";
-  deferred: Promise<any>;
-  data: any;
-  counter: number = 0;
-  resolver: any;
 
-  constructor(private http: HttpClient) {
+  constructor(private cryptoService: CryptoService, private http: HttpClient) {
   }
 
-  getToken(id: any) {
+  getToken(id: string) {
     this.http.post<any>(this.baseUrl.replace(":id", id), {}).subscribe();
   }
 
-  getWithProofOfWork(): Promise<any> {
-    return this.http.post("api/auth/token", {}).toPromise()
-      .then((response: any) => {
+  getWithProofOfWork(): Observable<any> {
+    return from(this.http.post("api/auth/token", {})).pipe(
+      switchMap((response: any) => {
         const token = response;
-        return this.proofOfWork(token.id)
-          .then((result: any) => {
-            token.answer = result;
-            return token;
-          });
-      });
-  }
-
-
-  getWebCrypto() {
-    if (typeof window === "undefined" || !window.isSecureContext) {
-      return;
-    }
-    return window.crypto.subtle;
-  };
-
-  calculateHash(hash: any, resolve: any) {
-    hash = new Uint8Array(hash);
-    if (hash[31] === 0) {
-      resolve(this.counter);
-    } else {
-      this.counter += 1;
-      this.work(resolve);
-    }
-  };
-
-  work(resolve: any) {
-    const webCrypto = this.getWebCrypto();
-    const toHash = this.str2Uint8Array(this.data + this.counter);
-    let digestPremise;
-
-    if (webCrypto) {
-      digestPremise = webCrypto.digest({name: "SHA-256"}, toHash);
-    } else {
-      digestPremise = new Promise((resolve, reject) => {
-        if (sha256(toHash)) {
-          resolve("ok");
-        } else {
-          reject("error");
-        }
-      });
-    }
-
-    if (typeof digestPremise.then !== "undefined") {
-      digestPremise.then(res => {
-        this.calculateHash(res, resolve);
-      });
-    } else {
-      digestPremise.then(res => {
-        return res;
-      });
-    }
-
-    return digestPremise;
-  }
-
-  proofOfWork(data: any): Promise<any> {
-
-    this.deferred = new Promise((resolve) => {
-      this.data = data;
-      this.counter = 0;
-      this.work(resolve);
-    });
-
-    return this.deferred;
-  }
-
-  str2Uint8Array(str: string) {
-    const result = new Uint8Array(str.length);
-    for (let i = 0; i < str.length; i++) {
-      result[i] = str.charCodeAt(i);
-    }
-    return result;
+        return this.cryptoService.proofOfWork(token.id).pipe(
+          switchMap((answer: any) => {
+            token.answer = answer;
+            return new Observable<any>((observer) => {
+              observer.next(token);
+              observer.complete();
+            });
+          })
+        );
+      })
+    );
   }
 }

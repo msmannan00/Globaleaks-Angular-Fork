@@ -1,24 +1,16 @@
-<div id="UserWarnings">
+<div id="UserWarnings" *ngIf="authentication.session">
     <div class="alert alert-secondary" *ngIf="authentication.session.role === 'admin' && nodeResolver.dataModel.update_available">
-      <i class="fa-solid fa-exclamation-circle"></i>
-      <span>{{'An update is available:' | translate}}</span> 
-      <span><a href="https://github.com/globaleaks/GlobaLeaks/blob/main/CHANGELOG" rel="noreferrer" target="_blank">
-        {{nodeResolver.dataModel.latest_version}}
-         (<span>{{'Changelog' | translate}}</span>)</a></span>
+        <i class="fa-solid fa-exclamation-circle"></i>
+        <span>{{'An update is available:' | translate}}</span>
+        <span>
+            <a href="https://github.com/globaleaks/GlobaLeaks/blob/main/CHANGELOG" rel="noreferrer" target="_blank">
+                {{nodeResolver.dataModel.latest_version}} ( <span>{{'Changelog' | translate}}</span>) </a>
+        </span>
     </div>
     <div class="alert alert-secondary" *ngIf="preferenceResolver.dataModel.encryption && !preferenceResolver.dataModel.clicked_recovery_key">
-      <i class="fa-solid fa-exclamation-circle"></i>
-      <span>
-        {{'We recommend that you access the “Preferences” section in order to retrieve your “Account Recovery Key” and store it safely. This key will be necessary to recover your access to the platform and to your data in case you forget your password.' | translate}}
-      </span>
+        <i class="fa-solid fa-exclamation-circle"></i>
+        <span>
+            {{'We recommend that you access the “Preferences” section in order to retrieve your “Account Recovery Key” and store it safely. This key will be necessary to recover your access to the platform and to your data in case you forget your password.' | translate}}
+        </span>
     </div>
-
-    <!-- TO DO LATER -->
-    <!-- <div class="alert alert-secondary" *ngIf="authentication.session.role === 'admin' && node.dataModel.encryption && !all_recipients_enabled">
-      <i class="fa-solid fa-exclamation-circle"></i>
-      <span>
-      {{"One or more recipients have not performed the first login yet. This means they won't be receiving reports." | translate}}  
-      </span>
-    </div> -->
-  </div>
-  
+</div>

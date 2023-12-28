@@ -19,9 +19,10 @@ describe("globaleaks process", function () {
     });
 
     it("Recipient actions ", function () {
-      cy.wait(3000);
+      cy.wait(1000)
       cy.login_receiver();
       cy.visit("/#/recipient/reports");
+      cy.waitForLoader(true)
 
       cy.get("#tip-0").first().click();
 
@@ -64,7 +65,6 @@ describe("globaleaks process", function () {
 
       cy.takeScreenshot("whistleblower/report", 0);
 
-      cy.wait(5000);
       cy.fixture("files/evidence-3.txt").then(fileContent => {
         cy.get('input[type="file"]').then(input => {
           const blob = new Blob([fileContent], { type: "text/plain" });
@@ -94,6 +94,8 @@ describe("globaleaks process", function () {
       cy.get(".TipInfoID").first().invoke("text").then(t => {
         expect(t.trim()).to.be.a("string");
       });
+      cy.waitForLoader(true)
+      cy.wait(1000)
 
       cy.get('[id="tip-action-silence"]').click();
       cy.get('#tip-action-notify').should('be.visible');

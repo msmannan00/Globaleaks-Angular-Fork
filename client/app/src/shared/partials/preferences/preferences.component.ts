@@ -12,14 +12,13 @@ export class PreferencesComponent {
   tabs = [
     {
       id: "tab1",
-      title: "One",
+      title: "Preferences",
       component: PreferenceTab1Component
     },
     {
       id: "tab2",
-      title: "Two",
+      title: "Password",
       component: PreferenceTab2Component
     }
   ];
-
 }

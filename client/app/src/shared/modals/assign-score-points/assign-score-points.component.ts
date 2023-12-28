@@ -8,13 +8,13 @@ import {NgbActiveModal, NgbModal} from "@ng-bootstrap/ng-bootstrap";
 export class AssignScorePointsComponent {
   @Input() arg = {
     score_points: 0,
-    score_type: 0
+    score_type: 'addition'
   };
-
-  confirmFunction: (data: any) => void;
 
   constructor(private activeModal: NgbActiveModal, private modalService: NgbModal) {
   }
+
+  confirmFunction: (data: { score_points: number, score_type: string }) => void;
 
   confirm() {
     this.confirmFunction(this.arg);

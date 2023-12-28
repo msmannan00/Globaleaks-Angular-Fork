@@ -19,24 +19,14 @@
         </tr>
         </tbody>
     </table>
-
-    <div class="text-center">
-        <ngb-pagination
-                [(page)]="currentPage"
-                [pageSize]="pageSize"
-                [collectionSize]="jobs.length"
-                [boundaryLinks]="true">
+    <div class="text-center" *ngIf="jobs.length > pageSize">
+        <ngb-pagination [(page)]="currentPage" [pageSize]="pageSize" [collectionSize]="jobs.length" [boundaryLinks]="true">
             <ng-template ngbPaginationPrevious>
                 < {{'Previous' | translate}}</ng-template>
             <ng-template ngbPaginationNext>{{'Next' | translate}} ></ng-template>
             <ng-template ngbPaginationFirst>
                 << {{'First' | translate}}</ng-template>
             <ng-template ngbPaginationLast>{{'Last' | translate}} >></ng-template>
-
         </ngb-pagination>
-    </div>
-
-    <button class="btn btn-sm btn-link" type="button" (click)="exportAuditLog()">
-        <i class="fa-solid fa-download"></i> Export
-    </button>
+    </div> <button class="btn btn-sm btn-link" type="button" (click)="exportAuditLog()"> <i class="fa-solid fa-download"></i> Export </button>
 </ng-container>

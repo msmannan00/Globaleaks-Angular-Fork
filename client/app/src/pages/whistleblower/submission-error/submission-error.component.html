@@ -16,10 +16,10 @@
             </ul>
             <ul *ngIf="submissionForm.invalid">
                 <span *ngFor="let step of context.questionnaire.steps | orderBy:'order'; let index = index">
-                    <li *ngIf="displayStepErrors(index)"  class="err-link" (click)="goToStep.emit(index)">{{step.label}}</li>
+                    <li *ngIf="displayStepErrors(index)" class="err-link" (click)="goToStep.emit(index)">{{step.label}}</li>
                 </span>
             </ul>
         </div>
     </div>
-    <src-step-error [field_id_map]="field_id_map" [stepForms] = stepForms [submission]="submission" (goToStep)="goToStep.emit()" [stepForm]="stepForm" [navigation]="navigation" [displayStepErrors]="displayStepErrors" ></src-step-error>
+    <src-step-error [field_id_map]="field_id_map" [stepForms]=stepForms [submission]="submission" (goToStep)="goToStep.emit()" [stepForm]="stepForm" [navigation]="navigation" [displayStepErrors]="displayStepErrors"></src-step-error>
 </div>

@@ -7,7 +7,10 @@
             </div>
         </div>
         <div class="form-group">
-            <label><span>{{ 'Privacy Policy' | translate }}</span> <span>(URL)</span></label>
+            <label>
+                <span>{{ 'Privacy Policy' | translate }}</span>
+                <span>(URL)</span>
+            </label>
             <input class="form-control" [(ngModel)]="nodeData.user_privacy_policy_url" type="text" />
         </div>
         <button class="btn btn-primary" (click)="updateNode()">

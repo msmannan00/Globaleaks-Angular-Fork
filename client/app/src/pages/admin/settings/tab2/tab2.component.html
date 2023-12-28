@@ -1,7 +1,7 @@
-<div class="row mt-4">
+<div class="row mt-4" *ngIf="authenticationData.session">
     <div class="col-md-10" [ngClass]="{'container-disabled': !authenticationData.session.permissions.can_upload_files}">
         <div class="form-group">
-            <div class="mb-2">
+            <div>
                 <ng-container *ngFor="let admin_file of admin_files">
                     <src-admin-file [adminFile]="admin_file"></src-admin-file>
                 </ng-container>
@@ -10,9 +10,7 @@
                 <div>{{ 'Files' | translate }}</div>
                 <div class="uploadfile file-custom">
                     <span class="custom-file">
-                        <input #uploader id="customFile" type="file"
-                        [style.display]="'none'" class="custom-file-input inputelem"
-                        (change)="onFileSelected(uploader.files)" />
+                        <input #uploader id="customFile" type="file" [style.display]="'none'" class="custom-file-input inputelem" (change)="onFileSelected(uploader.files)" />
                         <label class="btn btn-sm btn-primary" for="customFile">
                             <i class="fa-solid fa-upload"></i>
                             <span>{{ 'Upload' | translate }}</span>
@@ -23,29 +21,27 @@
             <div class="table-responsive">
                 <table class="table table-striped" id="fileList">
                     <tbody id="fileListBody">
-                        <tr *ngFor="let file of files | orderBy:'name'">
-                            <td>{{file.name}}</td>
-                            <td>
-                                <a class="btn btn-sm btn-primary" [href]="'s/' + file.name" [download]="file.name">
-                                    <i class="fa-solid fa-download"></i>
-                                    <span>{{ 'Download' | translate }}</span>
-                                </a>
-                                <button class="btn btn-sm btn-danger"
-                                    (click)="delete_file('/api/admin/files/' + file.id)">
-                                    <i class="fa-solid fa-trash"></i>
-                                    <span>{{ 'Delete' | translate }}</span>
-                                </button>
-                            </td>
-                        </tr>
+                    <tr *ngFor="let file of files | orderBy:'name'">
+                        <td>{{file.name}}</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary" [href]="'s/' + file.name" [download]="file.name">
+                                <i class="fa-solid fa-download"></i>
+                                <span>{{ 'Download' | translate }}</span>
+                            </a>
+                            <button class="btn btn-sm btn-danger" (click)="deleteFile('/api/admin/files/' + file.id)">
+                                <i class="fa-solid fa-trash"></i>
+                                <span>{{ 'Delete' | translate }}</span>
+                            </button>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-     <div class="col-md-2">
+    <div class="col-md-2">
         <div class="form-check form-switch">
-            <input #status class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" name="authenticationData.session.permissions.can_upload_files" [(ngModel)]="authenticationData.session.permissions.can_upload_files" (ngModelChange)="togglePermissionUploadFiles(status)">
-            <label class="form-check-label" for="flexSwitchCheckChecked">{{preferenceData.permissions.can_upload_files ? 'Enabled' : 'Disabled'}}</label>
+            <app-switch name="authenticationData.session.permissions.can_upload_files_switch" [isChecked]="permissionStatus" [label]="authenticationData.session.permissions.can_upload_files ? 'Enabled' : 'Disabled'" (click)="togglePermissionUploadFiles()"></app-switch>
         </div>
-     </div>
+    </div>
 </div>

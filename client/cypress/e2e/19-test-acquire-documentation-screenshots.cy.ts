@@ -1,7 +1,5 @@
-// Convert the Protractor test to Cypress test
 describe("acquire screenshots necessary for user documentation", () => {
   beforeEach(() => {
-    // Perform the login action before each test
     cy.login_admin();
   });
 

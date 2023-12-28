@@ -8,10 +8,12 @@ const routes: Routes = [
     path: "forcedtwofactor",
     component: ForcedTwoFactorComponent,
     pathMatch: "full",
+    data: {pageTitle: "Password reset"},
   }, {
     path: "forcedpasswordchange",
     component: ForcePasswordChangeComponent,
     pathMatch: "full",
+    data: {pageTitle: "Password reset"},
   }
 
 ];

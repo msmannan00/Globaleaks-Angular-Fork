@@ -56,7 +56,6 @@ ConfigDescriptor = {
     'enable_signup': Bool(default=False),
     'encryption': Bool(default=True),
     'escrow': Bool(default=False),
-    'footer_accessibility_declaration':  Unicode(),
     'footer_privacy_policy':  Unicode(),
     'footer_whistleblowing_policy': Unicode(),
     'hostname': Unicode(default=''),
@@ -111,7 +110,6 @@ ConfigDescriptor = {
     'unread_reminder_time': Int(default=7),  # Days
     'version': Unicode(default=str(__version__)),
     'version_db': Int(default=DATABASE_VERSION),
-    'viewer': Bool(default=True),
     'wizard_done': Bool(default=False),
     'uuid': Unicode(default=uuid4)
 }
@@ -139,7 +137,6 @@ ConfigFilters = {
         'enable_signup',
         'encryption',
         'escrow',
-        'footer_accessibility_declaration',
         'footer_privacy_policy',
         'footer_whistleblowing_policy',
         'hostname',
@@ -180,7 +177,6 @@ ConfigFilters = {
         'unread_reminder_time',
         'version',
         'version_db',
-        'viewer',
         'wizard_done',
         'uuid'
     ],
@@ -203,7 +199,6 @@ ConfigFilters = {
         'enable_signup',
         'encryption',
         'escrow',
-        'footer_accessibility_declaration',
         'footer_privacy_policy',
         'footer_whistleblowing_policy',
         'hostname',
@@ -232,7 +227,6 @@ ConfigFilters = {
         'two_factor',
         'version',
         'version_db',
-        'viewer',
         'wizard_done',
         'uuid',
         'unread_reminder_time'
@@ -258,7 +252,6 @@ ConfigFilters = {
         'description',
         'favicon',
         'footer',
-        'footer_accessibility_declaration',
         'footer_privacy_policy',
         'footer_whistleblowing_policy',
         'header_title_homepage',
@@ -294,7 +287,6 @@ ConfigFilters = {
         'enable_custom_privacy_badge',
         'enable_scoring_system',
         'enable_signup',
-        'footer_accessibility_declaration',
         'footer_privacy_policy',
         'footer_whistleblowing_policy',
         'hostname',
@@ -310,7 +302,6 @@ ConfigFilters = {
         'signup_tos2_enable',
         'simplified_login',
         'subdomain',
-        'viewer',
         'wizard_done',
     ],
     'tenant': [

@@ -1,10 +1,11 @@
 import {Component, Input} from "@angular/core";
 import {AppDataService} from "@app/app-data.service";
 import {HttpService} from "@app/shared/services/http.service";
-import {DeleteConfirmationComponent} from "@app/shared/modals/delete-confirmation/delete-confirmation.component";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {AppConfigService} from "@app/services/app-config.service";
+import {DeleteConfirmationComponent} from "@app/shared/modals/delete-confirmation/delete-confirmation.component";
+import {Observable} from "rxjs";
+import {Status} from "@app/models/app/public-model";
 
 @Component({
   selector: "src-substatusmanager",
@@ -12,39 +13,39 @@ import {AppConfigService} from "@app/services/app-config.service";
 })
 export class SubStatusManagerComponent {
   editing = false;
-  @Input() submissionsStatus: any;
+  @Input() submissionsStatus: Status;
+  @Input() submissionStatuses: Status[];
   @Input() index: number;
   @Input() first: boolean;
   @Input() last: boolean;
 
 
-  constructor(private appConfigService: AppConfigService, private appDataServices: AppDataService, private httpService: HttpService, private modalService: NgbModal, private utilsService: UtilsService) {
+  constructor(private appDataServices: AppDataService, private httpService: HttpService, private modalService: NgbModal, private utilsService: UtilsService) {
 
   }
-
-  isSystemDefined(state: any): boolean {
+  isSystemDefined(state: Status): boolean {
     return ["new", "opened", "closed"].indexOf(state.id) !== -1;
   }
 
-  toggleEditing(submissionsStatus: any): void {
+  toggleEditing(submissionsStatus: Status): void {
     if (this.isEditable(submissionsStatus)) {
       this.editing = !this.editing;
     }
   }
 
-  isEditable(submissionsStatus: any): boolean {
+  isEditable(submissionsStatus: Status): boolean {
     return ["new", "opened"].indexOf(submissionsStatus.id) === -1;
   }
 
-  moveUp(e: any, idx: number): void {
+  moveUp(e:Event, idx: number): void {
     this.swap(e, idx, -1);
   }
 
-  moveDown(e: any, idx: number): void {
+  moveDown(e:Event, idx: number): void {
     this.swap(e, idx, 1);
   }
 
-  ssIdx(ssID: any): number | undefined {
+  ssIdx(ssID:string): number | undefined {
     for (let i = 0; i < this.appDataServices.submissionStatuses.length; i++) {
       const status = this.appDataServices.submissionStatuses[i];
       if (status.id === ssID) {
@@ -54,7 +55,7 @@ export class SubStatusManagerComponent {
     return undefined;
   }
 
-  swap($event: any, index: number, n: number): void {
+  swap($event: Event, index: number, n: number): void {
     $event.stopPropagation();
 
     const target = index + n;
@@ -73,39 +74,37 @@ export class SubStatusManagerComponent {
 
       const reorderedIds = {
         ids: this.appDataServices.submissionStatuses
-          .map((c: any) => c.id)
+          .map((c: Status) => c.id)
           .filter((c: number | string) => c)
       };
-      const data = {
-        "operation": "order_elements",
-        "args": reorderedIds,
-      };
-      this.httpService.runOperation("/api/admin/statuses", "order_elements", data, false);
+      this.httpService.runOperation("api/admin/statuses", "order_elements", reorderedIds, false).subscribe();
     }
   }
 
-  deleteSubmissionStatus(submissionsStatus: any): void {
-    this.openConfirmableModalDialog(submissionsStatus, "");
+  deleteSubmissionStatus(submissionsStatus: Status): void {
+    this.openConfirmableModalDialog(submissionsStatus, "").subscribe();
   }
 
-  saveSubmissionsStatus(submissionsStatus: any): void {
-    const url = "/api/admin/statuses/" + submissionsStatus.id;
+  saveSubmissionsStatus(submissionsStatus: Status): void {
+    const url = "api/admin/statuses/" + submissionsStatus.id;
     this.httpService.requestUpdateStatus(url, submissionsStatus).subscribe(_ => {
-      this.appConfigService.reinit();
     });
   }
 
-  openConfirmableModalDialog(arg: any, scope: any): Promise<any> {
+  openConfirmableModalDialog(arg: Status, scope: any): Observable<string> {
     scope = !scope ? this : scope;
-    const modalRef = this.modalService.open(DeleteConfirmationComponent);
-    modalRef.componentInstance.arg = arg;
-    modalRef.componentInstance.scope = scope;
-    modalRef.componentInstance.confirmFunction = () => {
-      const url = "/api/admin/statuses/" + arg.id;
-      return this.utilsService.deleteStatus(url).subscribe(_ => {
-        this.appConfigService.reinit();
-      });
-    };
-    return modalRef.result;
+    let self = this
+    return new Observable((observer) => {
+      let modalRef = this.modalService.open(DeleteConfirmationComponent,{backdrop: 'static',keyboard: false});
+      modalRef.componentInstance.arg = arg;
+      modalRef.componentInstance.scope = scope;
+      modalRef.componentInstance.confirmFunction = () => {
+        observer.complete()
+        const url = "api/admin/statuses/" + arg.id;
+        return self.utilsService.deleteStatus(url).subscribe(_ => {
+        this.utilsService.deleteResource(this.submissionStatuses,arg);
+        });
+      };
+    });
   }
 }

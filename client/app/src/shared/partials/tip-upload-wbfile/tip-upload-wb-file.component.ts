@@ -1,9 +1,10 @@
-import {Component, Input, ViewChild, ElementRef} from "@angular/core";
+import {Component, Input, ViewChild, ElementRef, ChangeDetectorRef, EventEmitter, Output} from "@angular/core";
 import {UtilsService} from "@app/shared/services/utils.service";
 import {AppDataService} from "@app/app-data.service";
-import {AuthenticationService} from "@app/services/authentication.service";
-import {AppConfigService} from "@app/services/app-config.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import * as Flow from "@flowjs/flow.js";
+import {RecieverTipData} from "@app/models/reciever/reciever-tip-data";
+import {FlowFile} from "@flowjs/flow.js";
 
 @Component({
   selector: "src-tip-upload-wbfile",
@@ -11,14 +12,16 @@ import * as Flow from "@flowjs/flow.js";
 })
 export class TipUploadWbFileComponent {
   @ViewChild("uploader") uploaderElementRef!: ElementRef<HTMLInputElement>;
-  @Input() tip: any = {};
-  @Input() key: any;
-
+  @Input() tip: RecieverTipData;
+  @Input() key: string;
+  @Output() dataToParent = new EventEmitter<string>();
   collapsed = false;
   file_upload_description: string = "";
-  fileInput: any = "fileinput";
+  fileInput: string = "fileinput";
+  showError: boolean = false;
+  errorFile: FlowFile|null;
 
-  constructor(private appConfigService: AppConfigService, private authenticationService: AuthenticationService, protected utilsService: UtilsService, private appDataService: AppDataService) {
+  constructor(private cdr: ChangeDetectorRef, private authenticationService: AuthenticationService, protected utilsService: UtilsService, protected appDataService: AppDataService) {
 
   }
 
@@ -41,22 +44,23 @@ export class TipUploadWbFileComponent {
         headers: {"X-Session": this.authenticationService.session.id}
       });
       flowJsInstance.on("fileSuccess", (_) => {
-        this.appConfigService.reinit(false);
-        this.utilsService.reloadCurrentRoute();
+        this.dataToParent.emit()
+        this.errorFile = null;
+      });
+      flowJsInstance.on("fileError", (file, _) => {
+        this.showError = true;
+        this.errorFile = file;
+        this.cdr.detectChanges();
       });
 
-      const fileNameParts = file.name.split(".");
-      const fileExtension = fileNameParts.pop();
-      const fileNameWithoutExtension = fileNameParts.join(".");
-      const timestamp = new Date().getTime();
-      const fileNameWithTimestamp = `${fileNameWithoutExtension}_${timestamp}.${fileExtension}`;
-      const modifiedFile = new File([file], fileNameWithTimestamp, {type: file.type});
-
-      flowJsInstance.addFile(modifiedFile);
-      flowJsInstance.upload();
+      this.utilsService.onFlowUpload(flowJsInstance, file);
     }
   }
-
-  protected readonly console = console;
-  protected readonly alert = alert;
+  listenToWbfiles(files:string){
+    this.utilsService.deleteResource(this.tip.rfiles, files);
+    this.dataToParent.emit()
+  }
+  protected dismissError() {
+    this.showError = false;
+  }
 }

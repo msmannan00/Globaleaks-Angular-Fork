@@ -1,5 +1,5 @@
-<form name="contentForm" #contentForm="ngForm" novalidate>
-    <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="active" >
+<form name="contentForm" #contentForm="ngForm" novalidate class="reveal">
+    <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="active">
         <ng-container *ngFor="let tab of tabs">
             <li [ngbNavItem]="tab.title">
                 <button ngbNavLink>{{ tab.title | translate }}</button>
@@ -11,7 +11,6 @@
     </ul>
     <div [ngbNavOutlet]="nav" class="mt-2"></div>
     <ng-template #tab1>
-        <src-casemanagement-tab1
-        ></src-casemanagement-tab1>
+        <src-casemanagement-tab1></src-casemanagement-tab1>
     </ng-template>
 </form>

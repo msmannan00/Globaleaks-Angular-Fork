@@ -9,8 +9,8 @@
             <span class="custom-file">
                 <input type="file" hidden #uploadInput (change)="importQuestion(uploadInput.files)" />
                 <label (click)="uploadInput.click()" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-upload"></i>
-                    {{'Import' | translate}}</label>
+                    <i class="fa-solid fa-upload"></i>{{'Import' | translate}}
+                </label>
             </span>
         </div>
     </div>
@@ -22,7 +22,7 @@
     <div class="col-md-12" *ngFor="let field of fields | orderBy:'label' ; let index = index">
         <div id="field-{{index}}" class="fieldBox">
             <form #editField="ngForm">
-                <src-fields [editField]="editField" [field]="field" [type]="'template'"></src-fields>
+                <src-fields [editField]="editField" [field]="field" [fields]="fields" [type]="'template'"></src-fields>
             </form>
         </div>
     </div>

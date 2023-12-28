@@ -1,5 +1,5 @@
 import {Component, OnInit} from "@angular/core";
-import {AuthenticationService} from "@app/services/authentication.service";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {LoginDataRef} from "@app/pages/auth/login/model/login-model";
 import {ActivatedRoute, Router} from "@angular/router";
 import {AppDataService} from "@app/app-data.service";
@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit {
         this.authentication.login(0, "", "", "", token);
       } else {
         if (this.authentication.session && this.authentication.session.homepage) {
-          this.router.navigateByUrl(this.authentication.session.homepage);
+          this.router.navigateByUrl(this.authentication.session.homepage).then();
         }
       }
     });

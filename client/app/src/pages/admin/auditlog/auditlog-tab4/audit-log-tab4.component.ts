@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 import {ngxCsv} from "ngx-csv";
 import {JobResolver} from "@app/shared/resolvers/job.resolver";
-import {jobResolverModel} from "@app/models/resolvers/jobResolverModel";
+import {jobResolverModel} from "@app/models/resolvers/job-resolver-model";
 
 @Component({
   selector: "src-auditlog-tab4",
@@ -10,7 +10,7 @@ import {jobResolverModel} from "@app/models/resolvers/jobResolverModel";
 export class AuditLogTab4Component {
   currentPage = 1;
   pageSize = 20;
-  jobs: any = new jobResolverModel();
+  jobs: jobResolverModel[]=[];
 
   constructor(private jobResolver: JobResolver) {
   }
@@ -20,10 +20,14 @@ export class AuditLogTab4Component {
   }
 
   loadAuditLogData() {
-    this.jobs = this.jobResolver.dataModel;
+    if (Array.isArray(this.jobResolver.dataModel)) {
+      this.jobs = this.jobResolver.dataModel;
+    } else {
+      this.jobs = [this.jobResolver.dataModel];
+    }
   }
 
-  getPaginatedData(): any[] {
+  getPaginatedData(): jobResolverModel[] {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     return this.jobs.slice(startIndex, endIndex);

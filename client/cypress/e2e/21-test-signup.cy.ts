@@ -31,6 +31,7 @@ describe("User Perform Signup", function() {
 
 describe("Admin Disable Signup", function() {
   it("should disable signup", function() {
+    cy.visit("/#/login");
     cy.login_admin();
 
     cy.visit("/#/admin/sites");
@@ -39,6 +40,8 @@ describe("Admin Disable Signup", function() {
     cy.get('i.fa-solid.fa-check').click();
 
     cy.logout();
+    cy.waitForLoader();
     cy.visit("/#/");
+
   });
 });

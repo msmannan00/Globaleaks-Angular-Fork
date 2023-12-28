@@ -1,7 +1,9 @@
-import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {Component, EventEmitter, Input, Output, QueryList} from "@angular/core";
 import {NgForm} from "@angular/forms";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {SubmissionService} from "@app/services/submission.service";
+import {SubmissionService} from "@app/services/helper/submission.service";
+import {Field} from "@app/models/resolvers/field-template-model";
+import {Context} from "@app/models/reciever/reciever-tip-data";
 
 @Component({
   selector: "src-submission-error",
@@ -15,12 +17,12 @@ export class SubmissionErrorComponent {
   @Input() hasNextStep: boolean;
   @Input() areReceiverSelected: boolean;
   @Input() singleStepForm: boolean;
-  @Input() context: any;
+  @Input() context: Context;
   @Input() navigation: number;
-  @Input() uploads: number;
+  @Input() uploads: { [key: string]: any };
   @Input() submission: SubmissionService;
-  @Input() stepForms: any;
-  @Input() field_id_map: any;
+  @Input() stepForms: QueryList<NgForm>;
+  @Input() field_id_map: { [key: string]: Field };
 
   @Input() displayStepErrors: Function;
   @Input() stepForm: Function;

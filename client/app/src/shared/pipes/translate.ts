@@ -8,6 +8,7 @@ import {TranslateService} from "@ngx-translate/core";
 export class TranslatorPipe {
   constructor(private translate: TranslateService) {
   }
+
   transform(key: string): string {
     let translation = this.translate.instant(key);
 

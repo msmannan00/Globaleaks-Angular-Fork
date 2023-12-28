@@ -1,4 +1,4 @@
-export class tokenResponse {
+export class TokenResponse {
   id: string;
   answer: string;
 }

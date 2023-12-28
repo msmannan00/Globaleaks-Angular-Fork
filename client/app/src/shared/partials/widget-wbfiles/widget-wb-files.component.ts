@@ -1,5 +1,6 @@
 import {Component, Input} from "@angular/core";
-import {WbtipService} from "@app/services/wbtip.service";
+import {ReceiversById} from "@app/models/reciever/reciever-tip-data";
+import {WbtipService} from "@app/services/helper/wbtip.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 
 @Component({
@@ -8,9 +9,9 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class WidgetWbFilesComponent {
 
-  @Input() index: any;
-  @Input() ctx: any;
-  @Input() receivers_by_id: any;
+  @Input() index: number;
+  @Input() ctx: string;
+  @Input() receivers_by_id: ReceiversById;
 
   collapsed = false;
   submission = {};
@@ -20,5 +21,8 @@ export class WidgetWbFilesComponent {
 
   public toggleCollapse() {
     this.collapsed = !this.collapsed;
+  }
+  listenToWbfiles(files: string){
+    this.utilsService.deleteResource(this.wbTipService.tip.rfiles, files);
   }
 }

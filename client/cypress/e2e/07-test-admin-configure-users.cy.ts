@@ -70,7 +70,7 @@ describe("admin add, configure, and delete users", () => {
             cy.contains("span", "Set password").first().click();
             cy.get('input[name="password"]').clear().type(Cypress.env("init_password"));
             cy.get('#setPasswordButton').should('be.visible').click();
-            cy.waitForLoader()
+            cy.waitForLoader(false);
           }
         });
       }

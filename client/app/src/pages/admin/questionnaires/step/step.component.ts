@@ -1,21 +1,31 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, Input, OnInit} from "@angular/core";
+import {Questionnaire} from "@app/models/app/public-model";
+import {ParsedFields} from "@app/models/component-model/parsedFields";
+import {fieldtemplatesResolverModel} from "@app/models/resolvers/field-template-model";
+import {Step, questionnaireResolverModel} from "@app/models/resolvers/questionnaire-model";
 import {FieldTemplatesResolver} from "@app/shared/resolvers/field-templates-resolver.service";
+import {HttpService} from "@app/shared/services/http.service";
 
 @Component({
   selector: "src-step",
   templateUrl: "./step.component.html"
 })
 export class StepComponent implements OnInit {
-  @Input() step: any;
+  @Input() step: Step;
+  @Input() parsedFields: ParsedFields;
   showAddQuestion: boolean = false;
   showAddQuestionFromTemplate: boolean = false;
-  fieldTemplatesData: any = [];
+  fieldTemplatesData: fieldtemplatesResolverModel[] = [];
 
-  constructor(protected fieldTemplates: FieldTemplatesResolver) {
+  constructor(private cdr: ChangeDetectorRef, private httpService: HttpService, protected fieldTemplates: FieldTemplatesResolver) {
   }
 
   ngOnInit(): void {
-    this.fieldTemplatesData = this.fieldTemplates.dataModel;
+    if (Array.isArray(this.fieldTemplates.dataModel)) {
+      this.fieldTemplatesData = this.fieldTemplates.dataModel;
+    } else {
+      this.fieldTemplatesData = [this.fieldTemplates.dataModel];
+    }
   }
 
   toggleAddQuestion(): void {
@@ -34,5 +44,23 @@ export class StepComponent implements OnInit {
 
   listenToAddFieldFormTemplate() {
     this.showAddQuestionFromTemplate = false;
+  }
+  listenToFields() {
+    this.getResolver()
+  }
+  
+  getResolver() {
+    return this.httpService.requestQuestionnairesResource().subscribe(response => {
+      response.forEach((step: questionnaireResolverModel) => {
+        if (step.id == this.step.questionnaire_id) {
+          step.steps.forEach((innerStep: any) => {
+            if (innerStep.id == this.step.id) {
+              this.step = innerStep;
+            }
+          })
+          this.cdr.markForCheck();
+        }
+      });
+    });
   }
 }

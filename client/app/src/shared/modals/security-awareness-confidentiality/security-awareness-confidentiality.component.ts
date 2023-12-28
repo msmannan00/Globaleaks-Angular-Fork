@@ -6,10 +6,11 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
   templateUrl: "./security-awareness-confidentiality.component.html",
 })
 export class SecurityAwarenessConfidentialityComponent {
-  confirmFunction: () => void;
 
   constructor(private activeModal: NgbActiveModal) {
   }
+
+  confirmFunction: () => void;
 
   confirm() {
     this.confirmFunction();

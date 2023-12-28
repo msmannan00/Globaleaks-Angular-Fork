@@ -1,5 +1,5 @@
-<form name="contentForm" novalidate>
-    <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="active" >
+<form name="contentForm" novalidate class="reveal">
+    <ul ngbNav #nav="ngbNav" class="nav-tabs" [(activeId)]="active">
         <ng-container *ngFor="let tab of tabs">
             <li [ngbNavItem]="tab.title">
                 <button ngbNavLink>{{ tab.title | translate }}</button>

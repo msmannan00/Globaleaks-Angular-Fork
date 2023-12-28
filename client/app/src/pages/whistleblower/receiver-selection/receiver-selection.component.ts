@@ -1,4 +1,5 @@
 import {Component, EventEmitter, Input, Output} from "@angular/core";
+import {SubmissionService} from "@app/services/helper/submission.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 
 @Component({
@@ -8,8 +9,8 @@ import {UtilsService} from "@app/shared/services/utils.service";
 export class ReceiverSelectionComponent {
 
   @Input() show_steps_navigation_bar: boolean;
-  @Input() submission: any;
-  @Input() receiversOrderPredicate: any;
+  @Input() submission: SubmissionService;
+  @Input() receiversOrderPredicate: string;
   @Output() switchSelection: EventEmitter<any> = new EventEmitter();
 
   constructor(protected utilsService: UtilsService) {

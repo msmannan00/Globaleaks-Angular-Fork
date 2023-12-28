@@ -10,7 +10,6 @@ describe("admin add, configure and delete questionnaires", () => {
     cy.get(".show-add-question-btn").first().click();
     cy.get("input[name='new_field.label']").first().type(question_type);
     cy.get("select[name='new_field.type']").first().select(question_type);
-
     cy.get("#add-field-btn").first().click();
 
     if (["Checkbox", "Selection box"].indexOf(question_type) === 0) {
@@ -27,11 +26,14 @@ describe("admin add, configure and delete questionnaires", () => {
 
       cy.get('button[name="delOption"]').eq(2).click();
       cy.get('button[name="save_field"]').filter(':visible').first().click();
+      if(step_trigger){
+        cy.contains("Step 2").click();
+      }
     }
   };
 
   const add_step = async (step_label:string) => {
-    cy.get(".show-add-step-btn").click();
+    cy.get("button[name='new_step']").click();
     cy.get("input[name='new_step.label']").type(step_label);
     cy.get("#add-step-btn").click();
     cy.contains(step_label).should("be.visible");
@@ -51,10 +53,10 @@ describe("admin add, configure and delete questionnaires", () => {
     add_step("Step 3");
 
     const fieldTypes = Cypress.env("field_types");
-    fieldTypes.forEach((questionType:string) => {
-      cy.contains("Step 2").click();
-      add_question(questionType, true);
-      cy.waitForLoader()
+    fieldTypes.forEach((questionType: string) => {
+        cy.contains("Step 2").click();
+        add_question(questionType, true);
+        cy.waitForLoader();
     });
 
     cy.contains("Step 2").click();

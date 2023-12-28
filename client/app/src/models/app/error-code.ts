@@ -1,4 +1,4 @@
-export class errorCodes {
+export class ErrorCodes {
   message: string = "";
   arguments = [];
   code: number = -1;

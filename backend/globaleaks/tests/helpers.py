@@ -361,7 +361,6 @@ class MockDict:
             'basic_auth_password': '',
             'custom_support_url': '',
             'pgp': False,
-            'viewer': False,
             'user_privacy_policy_text': '',
             'user_privacy_policy_url': ''
         }
@@ -750,6 +749,11 @@ class TestGL(unittest.TestCase):
     def get_wbfiles(self, session, rtip_id):
         return [x[0] for x in session.query(models.WhistleblowerFile.id) \
                                      .filter(models.WhistleblowerFile.receivertip_id == rtip_id)]
+
+    @transact
+    def get_ifiles_by_wbtip_id(self, session, wbtip_id):
+        return [x[0] for x in session.query(models.InternalFile.id) \
+                                     .filter(models.InternalFile.internaltip_id == wbtip_id)]
 
     @transact
     def get_wbtips(self, session):

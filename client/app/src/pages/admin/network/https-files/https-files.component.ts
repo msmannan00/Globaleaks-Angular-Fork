@@ -1,9 +1,13 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
+import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmationComponent} from "@app/shared/modals/confirmation/confirmation.component";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {HttpService} from "@app/shared/services/http.service";
 import {UtilsService} from "@app/shared/services/utils.service";
+import {nodeResolverModel} from "@app/models/resolvers/node-resolver-model";
+import {TlsConfig} from "@app/models/component-model/tls-confiq";
+import {FileResource, FileResources} from "@app/models/component-model/file-resources";
 
 @Component({
   selector: "src-https-files",
@@ -11,76 +15,63 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class HttpsFilesComponent implements OnInit {
   @Output() dataToParent = new EventEmitter<string>();
-  @Input() tlsConfig: any;
-  @Input() state: any;
-  menuState: string;
-  nodeData: any;
-  fileResources: {
-    key: any,
-    cert: any,
-    chain: any,
-    csr: any,
+  @Input() tlsConfig: TlsConfig;
+  @Input() state: number = 0;
+  nodeData: nodeResolverModel;
+  fileResources:FileResources = {
+    key: {name: "key"},
+    cert: {name: "cert"},
+    chain: {name: "chain"},
+    csr: {name: "csr"},
   };
   csr_state = {
     open: false
   };
 
-  constructor(private nodeResolver: NodeResolver, private httpService: HttpService, private modalService: NgbModal, private utilsService: UtilsService) {
-    this.fileResources = {
-      key: {name: "key"},
-      cert: {name: "cert"},
-      chain: {name: "chain"},
-      csr: {name: "csr"},
-    };
+  constructor(private authenticationService: AuthenticationService, private nodeResolver: NodeResolver, private httpService: HttpService, private modalService: NgbModal, private utilsService: UtilsService) {
   }
 
   ngOnInit(): void {
     this.nodeData = this.nodeResolver.dataModel;
   }
 
-  postFile(file: any, resource: any) {
-    this.utilsService.readFileAsText(file[0]).then(
-      (str: string) => {
-        resource.content = str;
-        this.httpService.requestCSRContentResource(resource.name, resource).subscribe(
-          () => {
-            this.dataToParent.emit();
-          }
-        );
-      },
-      (error) => {
-        console.error("Error reading file:", error);
-      }
-    );
+  postFile(files: FileList | null, resource: FileResource) {
+    if (files && files.length > 0) {
+      const file = files[0];
+      this.utilsService.readFileAsText(file).subscribe(
+        (str: string) => {
+          resource.content = str;
+          this.httpService.requestCSRContentResource(resource.name, resource).subscribe(
+            () => {
+              this.dataToParent.emit();
+            }
+          );
+        },
+      );
+    }
   }
 
-  gen_key() {
-    this.httpService.requestUpdateTlsConfigFilesResource("key", this.fileResources.key).subscribe(() => {
+  genKey() {
+    const authHeader = this.authenticationService.getHeader();
+    this.httpService.requestUpdateTlsConfigFilesResource("key", authHeader, this.fileResources.key).subscribe(() => {
       this.dataToParent.emit();
     });
   }
 
-  deleteFile(fileResource: any) {
-    const modalRef = this.modalService.open(ConfirmationComponent);
+  deleteFile(fileResource: FileResource) {
+    const modalRef = this.modalService.open(ConfirmationComponent,{backdrop: 'static',keyboard: false});
     modalRef.componentInstance.arg = fileResource.name;
-    modalRef.componentInstance.confirmFunction = (arg: any) => {
+    modalRef.componentInstance.confirmFunction = (arg: string) => {
       return this.httpService.requestDeleteTlsConfigFilesResource(arg).subscribe(() => {
         this.dataToParent.emit();
-        // this.utilsService.reloadCurrentRoute()
       });
     };
     return modalRef.result;
   }
 
-  httpsCsr(data: any) {
-    this.fileResources = data;
-    this.csr_state.open = false;
-    this.dataToParent.emit();
-  }
-
   downloadCSR() {
     this.httpService.downloadCSRFile().subscribe(
-      (response: any) => {
+      (response: Blob) => {
         const blob = new Blob([response], {type: "application/octet-stream"});
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -93,21 +84,13 @@ export class HttpsFilesComponent implements OnInit {
   }
 
   toggleCfg() {
-    if (this.tlsConfig.enabled) {
-      this.httpService.disableTLSConfig().subscribe(() => {
-        this.dataToParent.emit();
-      });
-    } else {
-      this.httpService.enableTLSConfig().subscribe(() => {
-        window.location.href = "https://" + this.nodeData.hostname;
-      });
-    }
+    this.utilsService.toggleCfg(this.authenticationService, this.tlsConfig, this.dataToParent);
   }
 
   resetCfg() {
-    const modalRef = this.modalService.open(ConfirmationComponent);
+    const modalRef = this.modalService.open(ConfirmationComponent,{backdrop: 'static',keyboard: false});
     modalRef.componentInstance.arg = null;
-    modalRef.componentInstance.confirmFunction = (_: any) => {
+    modalRef.componentInstance.confirmFunction = () => {
       return this.httpService.requestDeleteTlsConfigResource().subscribe(() => {
         this.dataToParent.emit();
       });

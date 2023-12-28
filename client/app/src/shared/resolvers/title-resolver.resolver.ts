@@ -1,11 +1,11 @@
 import {Injectable} from "@angular/core";
-import {ActivatedRouteSnapshot, Resolve} from "@angular/router";
+import {ActivatedRouteSnapshot} from "@angular/router";
 import {Title} from "@angular/platform-browser";
 
 @Injectable({
   providedIn: "root",
 })
-export class TitleResolver implements Resolve<void> {
+export class TitleResolver  {
   constructor(private titleService: Title) {
   }
 

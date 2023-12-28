@@ -1,0 +1,3 @@
+tar-ignore = GlobaLeaks/doc/_build
+tar-ignore = GlobaLeaks/client/node_modules
+tar-ignore = GlobaLeaks/client/build

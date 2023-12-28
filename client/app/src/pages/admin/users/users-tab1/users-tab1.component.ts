@@ -1,5 +1,7 @@
 import {Component, OnInit} from "@angular/core";
-import {new_user} from "@app/models/admin/new_user";
+import {NewUser} from "@app/models/admin/new-user";
+import {tenantResolverModel} from "@app/models/resolvers/tenant-resolver-model";
+import {userResolverModel} from "@app/models/resolvers/user-resolver-model";
 import {Constants} from "@app/shared/constants/constants";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {TenantsResolver} from "@app/shared/resolvers/tenants.resolver";
@@ -13,9 +15,9 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class UsersTab1Component implements OnInit {
   showAddUser = false;
-  tenantData: any = {};
-  usersData: any;
-  new_user: any = {};
+  tenantData: tenantResolverModel;
+  usersData: userResolverModel[];
+  new_user: {username:string, role:string, name:string,email:string} = {username:"", role:"", name:"",email:""};
   editing = false;
   protected readonly Constants = Constants;
 
@@ -28,7 +30,6 @@ export class UsersTab1Component implements OnInit {
     }
     if (this.nodeResolver.dataModel.root_tenant) {
       this.tenantData = this.tenantsResolver.dataModel;
-
     }
   }
 
@@ -36,8 +37,8 @@ export class UsersTab1Component implements OnInit {
     this.getResolver();
   }
 
-  add_user(): void {
-    const user: new_user = new new_user();
+  addUser(): void {
+    const user: NewUser = new NewUser();
 
     user.username = typeof this.new_user.username !== "undefined" ? this.new_user.username : "";
     user.role = this.new_user.role;
@@ -46,7 +47,7 @@ export class UsersTab1Component implements OnInit {
     user.language = this.nodeResolver.dataModel.default_language;
     this.utilsService.addAdminUser(user).subscribe(_ => {
       this.getResolver();
-      this.new_user = {};
+      this.new_user = {username:"", role:"", name:"",email:""};
     });
   }
 

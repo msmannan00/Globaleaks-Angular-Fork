@@ -6,7 +6,7 @@
 </div>
 <div class="modal-body">
     <label>{{'Please write a motivation for the reply'}}</label>
-    <span class="text-danger" [ngbTooltip]="'This field is mandatory' | translate">*</span>
+    <span class="text-danger"  data-toggle="tooltip" title="{{'This field is mandatory' | translate}}">*</span>
     <textarea class="form-control" [(ngModel)]="reply_motivation" [placeholder]="'Reply motivation' | translate"></textarea>
 </div>
 <div class="modal-footer">
@@ -15,7 +15,7 @@
         <span>{{'Send'|translate}}</span>
     </button>
     <span id="modal-action-cancel" class="btn btn-outline-secondary" (click)="cancel()">
-    <i class="fa-solid fa-times"></i>
-    <span>{{'Cancel'|translate}}</span>
-  </span>
+        <i class="fa-solid fa-times"></i>
+        <span>{{'Cancel'|translate}}</span>
+    </span>
 </div>

@@ -1,4 +1,5 @@
 import {Component, OnInit} from "@angular/core";
+import {TlsConfig} from "@app/models/component-model/tls-confiq";
 import {Constants} from "@app/shared/constants/constants";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
 import {HttpService} from "@app/shared/services/http.service";
@@ -10,10 +11,10 @@ import {UtilsService} from "@app/shared/services/utils.service";
 })
 export class HttpsComponent implements OnInit {
   protected readonly Constants = Constants;
-  hostname: any;
+  hostname: string;
   state = 0;
   menuState = "setup";
-  tlsConfig: any;
+  tlsConfig: TlsConfig;
 
   constructor(protected nodeResolver: NodeResolver, private httpService: HttpService, private utilsService: UtilsService) {
   }
@@ -24,18 +25,22 @@ export class HttpsComponent implements OnInit {
 
   initFunction() {
     this.httpService.requestTlsConfigResource().subscribe(
-      (config: any) => {
+      (config: TlsConfig) => {
         this.parseTLSConfig(config);
       }
     );
   }
 
-  updateHostname(hostname: any) {
-    this.utilsService.runAdminOperation("set_hostname", {"value": hostname}, true).subscribe();
-    this.utilsService.reloadCurrentRoute();
+  updateHostname(hostname: string) {
+    this.utilsService.runAdminOperation("set_hostname", {"value": hostname}, false)
+      .subscribe(
+        () => {
+          location.href = "https://"+this.nodeResolver.dataModel.hostname;
+        }
+      );
   }
 
-  parseTLSConfig(tlsConfig: any): void {
+  parseTLSConfig(tlsConfig: TlsConfig): void {
     this.tlsConfig = tlsConfig;
 
     let t = 0;

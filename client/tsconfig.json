@@ -1,5 +1,6 @@
 {
   "compileOnSave": false,
+  "typescript": "5.2",
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist/out-tsc",

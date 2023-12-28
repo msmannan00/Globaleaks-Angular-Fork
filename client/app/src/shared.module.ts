@@ -35,7 +35,6 @@ import {ScrollToBottomDirective} from "@app/shared/directive/scroll-to-bottom.di
 import {TipReceiverListComponent} from "@app/shared/partials/tip-receiver-list/tip-receiver-list.component";
 import {FilterPipe} from "@app/shared/pipes/filter.pipe";
 import {RequestSupportComponent} from "@app/shared/modals/request-support/request-support.component";
-import {WhistleblowerIdentityFieldComponent} from "@app/pages/field/whistleblower-identity-field/whistleblower-identity-field.component";
 import {NgxFlowModule} from "@flowjs/ngx-flow";
 import {RFilesUploadStatusComponent} from "@app/shared/partials/rfiles-upload-status/r-files-upload-status.component";
 import {NgFormChangeDirective} from "@app/shared/directive/ng-form-change.directive";
@@ -80,6 +79,8 @@ import {SecurityAwarenessConfidentialityComponent} from "@app/shared/modals/secu
 import {TransferAccessComponent} from "@app/shared/modals/transfer-access/transfer-access.component";
 import {BlankComponent} from "@app/shared/blank/blank.component";
 import {VoiceRecorderComponent} from "@app/shared/partials/voice-recorder/voice-recorder.component";
+import {Tab1Component} from "@app/pages/admin/settings/tab1/tab1.component";
+import { SwitchComponent } from "@app/shared/components/switch/switch.component";
 
 @NgModule({
   imports: [
@@ -140,7 +141,6 @@ import {VoiceRecorderComponent} from "@app/shared/partials/voice-recorder/voice-
     TipReceiverListComponent,
     FilterPipe,
     RequestSupportComponent,
-    WhistleblowerIdentityFieldComponent,
     RFilesUploadStatusComponent,
     NgFormChangeDirective,
     WbFilesComponent,
@@ -184,7 +184,9 @@ import {VoiceRecorderComponent} from "@app/shared/partials/voice-recorder/voice-
     SecurityAwarenessConfidentialityComponent,
     DisclaimerComponent,
     BlankComponent,
-    VoiceRecorderComponent
+    VoiceRecorderComponent,
+    Tab1Component,
+    SwitchComponent
   ],
   exports: [
     FooterComponent,
@@ -238,7 +240,9 @@ import {VoiceRecorderComponent} from "@app/shared/partials/voice-recorder/voice-
     TransferAccessComponent,
     SecurityAwarenessConfidentialityComponent,
     DisclaimerComponent,
-    VoiceRecorderComponent
+    VoiceRecorderComponent,
+    Tab1Component,
+    SwitchComponent
   ]
 })
 export class SharedModule {

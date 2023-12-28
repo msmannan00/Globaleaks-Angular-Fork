@@ -1,100 +1,49 @@
-import {HttpClient} from "@angular/common/http";
 import {Component, Input, OnInit} from "@angular/core";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
-import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
 import {HttpService} from "@app/shared/services/http.service";
 import {UtilsService} from "@app/shared/services/utils.service";
-import {new_step} from "@app/models/admin/new_step";
+import {NewStep} from "@app/models/admin/new-step";
 import {QuestionnaireService} from "@app/pages/admin/questionnaires/questionnaire.service";
+import {Step, questionnaireResolverModel} from "@app/models/resolvers/questionnaire-model";
 
 @Component({
   selector: "src-steps",
   templateUrl: "./steps.component.html"
 })
 export class StepsComponent implements OnInit {
-  @Input() questionnaire: any;
+  @Input() questionnaire: questionnaireResolverModel;
   showAddStep: boolean = false;
-  step: any;
+  step: Step;
   editing: boolean = false;
   showAddTrigger: boolean = false;
   new_step: { label: string } = {label: ""};
-  parsedFields: any;
   new_trigger: { field: string; option: string; sufficient: boolean } = {
     field: "",
     option: "",
     sufficient: true,
   };
 
-  constructor(private questionnaireService: QuestionnaireService, private fieldUtilities: FieldUtilitiesService, protected node: NodeResolver, private http: HttpClient, protected utilsService: UtilsService, private httpService: HttpService) {
+  constructor(private questionnaireService: QuestionnaireService, protected node: NodeResolver, protected utilsService: UtilsService, private httpService: HttpService) {
   }
 
   ngOnInit(): void {
     this.step = this.questionnaire.steps[0];
-    this.parsedFields = this.fieldUtilities.parseQuestionnaire(this.questionnaire, {});
   }
 
   toggleAddStep() {
     this.showAddStep = !this.showAddStep;
   }
 
-  add_step() {
-    const step = new new_step();
+  addStep() {
+    const step = new NewStep();
     step.questionnaire_id = this.questionnaire.id;
     step.label = this.new_step.label;
     step.order = this.utilsService.newItemOrder(this.questionnaire.steps, "order");
 
-    this.httpService.requestAddAdminQuestionnaireStep(step).subscribe((_: any) => {
+    this.httpService.requestAddAdminQuestionnaireStep(step).subscribe(() => {
       this.new_step = {label: ""};
       return this.questionnaireService.sendData();
 
     });
-  }
-
-  swap($event: any, index: number, n: number): void {
-    $event.stopPropagation();
-    const target = index + n;
-    if (target < 0 || target >= this.questionnaire.steps.length) {
-      return;
-    }
-
-    [this.questionnaire.steps[index], this.questionnaire.steps[target]] =
-      [this.questionnaire.steps[target], this.questionnaire.steps[index]];
-
-    this.http.put("/api/admin/steps", {
-      operation: "order_elements",
-      args: {
-        ids: this.questionnaire.steps.map((c: { id: any; }) => c.id),
-        questionnaire_id: this.questionnaire.id
-      },
-    }).subscribe();
-  }
-
-  moveUp(e: any, idx: number): void {
-    this.swap(e, idx, -1);
-  }
-
-  moveDown(e: any, idx: number): void {
-    this.swap(e, idx, 1);
-  }
-
-  toggleEditing() {
-    this.editing = !this.editing;
-  }
-
-  toggleAddTrigger() {
-    this.showAddTrigger = !this.showAddTrigger;
-  }
-
-  addTrigger() {
-    this.step.triggered_by_options.push(this.new_trigger);
-    this.toggleAddTrigger();
-    this.new_trigger = {"field": "", "option": "", "sufficient": true};
-  }
-
-  delTrigger(trigger: any) {
-    const index = this.step.triggered_by_options.indexOf(trigger);
-    if (index !== -1) {
-      this.step.triggered_by_options.splice(index, 1);
-    }
   }
 }

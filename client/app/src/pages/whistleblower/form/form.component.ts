@@ -1,6 +1,9 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
 import {ControlContainer, NgForm} from "@angular/forms";
+import {SubmissionService} from "@app/services/helper/submission.service";
+import {Answers} from "@app/models/reciever/reciever-tip-data";
+import {Children, Step} from "@app/models/whistleblower/wb-tip-data";
 
 @Component({
   selector: "src-form",
@@ -8,21 +11,21 @@ import {ControlContainer, NgForm} from "@angular/forms";
   viewProviders: [{provide: ControlContainer, useExisting: NgForm}],
 })
 export class FormComponent implements OnInit {
-  @Input() step: any;
-  @Input() index: any;
-  @Input() answers: any;
-  @Input() uploads: any;
-  @Input() submission: any;
+  @Input() step: Step;
+  @Input() index: number;
+  @Input() answers: Answers;
+  @Input() uploads: { [key: string]: any };
+  @Input() submission: SubmissionService;
   @Input() displayErrors: boolean;
-  @Input() entry: any;
+  @Input() entry: string;
   @Input() identity_provided: any;
-  @Input() fileUploadUrl: any;
+  @Input() fileUploadUrl: string;
   @Output() notifyFileUpload: EventEmitter<any> = new EventEmitter<any>();
 
-  fields: any;
+  fields: Children[];
   stepId: string;
   rows: any;
-  status: any = {};
+  status: {opened: boolean};
 
   constructor(protected fieldUtilitiesService: FieldUtilitiesService) {
   }

@@ -1,15 +1,9 @@
 <div id="toolbar" class="row">
     <div class="col-md-12">
-    <span id="link-reload"
-          (click)="utilsService.reloadCurrentRoute()"
-          data-toggle="tooltip" title="{{'Refresh' | translate}}"
-          class="btn btn-outline-secondary">
-      <i class="fa-solid fa-sync"></i>
-    </span>
+        <span id="link-reload" (click)="onReload()" data-toggle="tooltip" title="{{'Refresh' | translate}}" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-sync"></i>
+        </span>
     </div>
-</div>
-<div *ngIf="appDataService.receipt">
-    <src-receipt-whistleblower></src-receipt-whistleblower>
 </div>
 <div class="row" *ngIf="wbTipService.tip.status !== 'closed' && wbTipService.tip.context.additional_questionnaire_id && wbTipService.tip.questionnaires.length === 1">
     <div class="col-md-12">
@@ -26,7 +20,6 @@
         <src-tip-receiver-list [tipService]="wbTipService"></src-tip-receiver-list>
     </div>
 </div>
-
 <div class="row">
     <div class="col-md-6">
         <src-tip-questionnaire-answers [tipService]="wbTipService"></src-tip-questionnaire-answers>
@@ -38,7 +31,7 @@
 <div class="row">
     <div class="col-md-12">
         <src-tip-files-whistleblower [fileUploadUrl]="fileUploadUrl" *ngIf="wbTipService.tip.enable_attachments"></src-tip-files-whistleblower>
-        <src-widget-wbfiles [receivers_by_id]="tip.receivers_by_id" [ctx]="ctx"  *ngIf="wbTipService.tip.wbfiles && wbTipService.tip.wbfiles.length"></src-widget-wbfiles>
+        <src-widget-wbfiles [receivers_by_id]="tip.receivers_by_id" [ctx]="ctx" *ngIf="wbTipService.tip.wbfiles && wbTipService.tip.wbfiles.length"></src-widget-wbfiles>
     </div>
 </div>
 <div class="row">

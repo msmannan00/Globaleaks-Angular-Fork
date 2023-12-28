@@ -1,0 +1,22 @@
+#!/bin/sh
+# This is the post installation script for globaleaks
+set -e
+
+# Create globaleaks user and add the user to required groups
+if ! id -u globaleaks >/dev/null 2>&1; then
+  adduser --quiet \
+          --uid 1337 \
+          --system \
+          --group \
+          --disabled-login \
+          --disabled-password \
+          --home /var/globaleaks \
+          --shell /bin/false \
+          globaleaks
+fi
+
+if [ ! -d "/var/globaleaks" ]; then
+    mkdir -m 700 /var/globaleaks && chown globaleaks:globaleaks /var/globaleaks
+fi
+
+#DEBHELPER#

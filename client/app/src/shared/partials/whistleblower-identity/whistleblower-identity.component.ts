@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, Output} from "@angular/core";
-import {WbtipService} from "@app/services/wbtip.service";
+import {Answers} from "@app/models/reciever/reciever-tip-data";
+import {WbtipService} from "@app/services/helper/wbtip.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 
 @Component({
@@ -11,15 +12,15 @@ export class WhistleblowerIdentityComponent {
   protected readonly JSON = JSON;
   @Input() field: any;
   @Input() step: any;
-  @Input() answers: any;
-  @Output() provideIdentityInformation = new EventEmitter<{ param1: any, param2: any }>();
+  @Input() answers: Answers;
+  @Output() provideIdentityInformation = new EventEmitter<{ param1: string, param2: Answers }>();
   @Output() onFormUpdate = new EventEmitter<void>();
   @Output() notifyFileUpload: EventEmitter<any> = new EventEmitter<any>();
 
-  @Input() uploadEstimateTime: any;
-  @Input() isUploading: any;
-  @Input() uploadProgress: any;
-  identity_provided: boolean = false;
+  @Input() uploadEstimateTime: number;
+  @Input() isUploading:boolean|undefined;
+  @Input() uploadProgress: number|undefined;
+  identity_provided: boolean = true;
 
   constructor(protected wbTipService: WbtipService, protected utilsService: UtilsService) {
     this.collapsed = this.wbTipService.tip.data.whistleblower_identity_provided;

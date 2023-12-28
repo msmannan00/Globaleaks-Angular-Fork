@@ -6,17 +6,15 @@ describe("Admin configure custom CSS", () => {
 
     cy.contains("button", "Files").click();
 
-    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked").click();
+    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked");
+    cy.get("[name='authenticationData.session.permissions.can_upload_files_switch']").click();
     cy.get(".modal").should("be.visible");
     cy.get(".modal [type='password']").type("wrongpassword");
     cy.get(".modal .btn-primary").click();
-
-    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked").click();
     cy.get(".modal").should("be.visible");
-
+    cy.wait(500)
     cy.get(".modal [type='password']").type(Cypress.env("user_password"));
     cy.get(".modal .btn-primary").click();
-
     cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("be.checked");
   });
 
@@ -25,7 +23,8 @@ describe("Admin configure custom CSS", () => {
     cy.visit("#/admin/settings");
     cy.contains("button", "Files").click();
 
-    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked").click();
+    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked");
+    cy.get("[name='authenticationData.session.permissions.can_upload_files_switch']").click();
     cy.get(".modal").should("be.visible");
     cy.get(".modal [type='password']").type(Cypress.env("user_password"));
     cy.get(".modal .btn-primary").click();
@@ -52,7 +51,8 @@ describe("Admin configure custom CSS", () => {
     cy.visit("#/admin/settings");
     cy.contains("button", "Files").click();
 
-    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked").click();
+    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked");
+    cy.get("[name='authenticationData.session.permissions.can_upload_files_switch']").click();
     cy.get(".modal").should("be.visible");
     cy.get(".modal [type='password']").type(Cypress.env("user_password"));
     cy.get(".modal .btn-primary").click();
@@ -71,11 +71,13 @@ describe("Admin configure custom CSS", () => {
       });
     });
 
-    cy.waitForLoader();
+    cy.waitForLoader()
     cy.contains("button", "Files").click();
     cy.get('table#fileList').contains('td', 'documentation').should('be.visible');
     cy.get("#fileList").contains("Delete").click();
-    cy.waitForLoader();
+
+    cy.waitForLoader()
+    cy.contains("button", "Files").click();
     cy.get('table#fileList').contains('td', 'documentation').should('not.exist');
   });
 
@@ -86,12 +88,15 @@ describe("Admin configure custom CSS", () => {
     cy.visit("#/admin/settings");
     cy.contains("button", "Files").click();
 
-    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked").click();
+    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked");
+    cy.get("[name='authenticationData.session.permissions.can_upload_files_switch']").click();
     cy.get(".modal").should("be.visible");
     cy.get(".modal [type='password']").type(Cypress.env("user_password"));
     cy.get(".modal .btn-primary").click();
 
-    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("be.checked").click();
+    cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("be.checked");
+    cy.get("[name='authenticationData.session.permissions.can_upload_files_switch']").click();
+    cy.contains("button", "Files").click();
     cy.get("[name='authenticationData.session.permissions.can_upload_files']").should("not.be.checked");
 
     cy.logout();

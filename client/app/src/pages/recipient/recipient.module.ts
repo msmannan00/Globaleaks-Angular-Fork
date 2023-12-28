@@ -13,7 +13,6 @@ import {FormsModule} from "@angular/forms";
 import {NgbDatepickerModule, NgbDropdownModule, NgbModule, NgbNavModule} from "@ng-bootstrap/ng-bootstrap";
 import {WhistleBlowerIdentityReceiverComponent} from "@app/pages/recipient/whistleblower-identity-reciever/whistle-blower-identity-receiver.component";
 import {NgMultiSelectDropDownModule} from "ng-multiselect-dropdown";
-import {Tab1Component} from "./tab1/tab1.component";
 
 @NgModule({
   declarations: [
@@ -21,9 +20,8 @@ import {Tab1Component} from "./tab1/tab1.component";
     SidebarComponent,
     TipsComponent,
     TipComponent,
-    Tab1Component,
     SettingsComponent,
-    WhistleBlowerIdentityReceiverComponent
+    WhistleBlowerIdentityReceiverComponent,
   ],
   imports: [
     CommonModule, RouterModule, TranslateModule, SharedModule, FormsModule,

@@ -1,7 +1,7 @@
 import {HttpClient} from "@angular/common/http";
 import {Component} from "@angular/core";
 import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
-import {ReceiverTipService} from "@app/services/receiver-tip.service";
+import {ReceiverTipService} from "@app/services/helper/receiver-tip.service";
 import {UtilsService} from "@app/shared/services/utils.service";
 
 
@@ -10,7 +10,7 @@ import {UtilsService} from "@app/shared/services/utils.service";
   templateUrl: "./tip-operation-file-identity-access-request.component.html"
 })
 export class TipOperationFileIdentityAccessRequestComponent {
-  request_motivation: any;
+  request_motivation: string;
   modal: NgbModalRef;
 
   constructor(private modalService: NgbModal, private tipsService: ReceiverTipService, private http: HttpClient, private utils: UtilsService) {

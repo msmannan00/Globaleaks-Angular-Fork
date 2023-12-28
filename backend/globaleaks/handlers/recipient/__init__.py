@@ -10,7 +10,7 @@ from sqlalchemy.sql.expression import distinct, func, and_
 
 from globaleaks import models
 from globaleaks.handlers.base import BaseHandler
-from globaleaks.handlers.recipient.rtip import db_grant_tip_access, db_revoke_tip_access
+from globaleaks.handlers.recipient.rtip import db_grant_tip_access, db_revoke_tip_access, db_notify_grant_access
 from globaleaks.models import serializers
 from globaleaks.orm import db_get, db_del, db_log, transact
 from globaleaks.rest import requests, errors
@@ -91,8 +91,7 @@ def get_receivertips(session, tid, receiver_id, user_key, language, args={}):
             subscription = 2
 
         ret.append({
-            'id': rtip.id,
-            'itip_id': itip.id,
+            'id': itip.id,
             'creation_date': itip.creation_date,
             'access_date': rtip.access_date,
             'last_access': itip.last_access,
@@ -133,12 +132,14 @@ def perform_tips_operation(session, tid, user_id, user_cc, operation, args):
 
     result = session.query(models.InternalTip, models.ReceiverTip) \
                                  .filter(models.ReceiverTip.receiver_id == user_id,
-                                         models.ReceiverTip.id.in_(args['rtips']),
-                                         models.InternalTip.id == models.ReceiverTip.internaltip_id)
+                                         models.InternalTip.id == models.ReceiverTip.internaltip_id,
+                                         models.InternalTip.id.in_(args['rtips']))
 
     if operation == 'grant' and receiver.can_grant_access_to_reports:
         for itip, rtip in result:
-            if db_grant_tip_access(session, tid, user_id, user_cc, itip, rtip, args['receiver']):
+            new_receiver, _ = db_grant_tip_access(session, tid, user_id, user_cc, itip, rtip, args['receiver'])
+            if new_receiver:
+                db_notify_grant_access(session, new_receiver)
                 db_log(session, tid=tid, type='grant_access', user_id=user_id, object_id=itip.id)
 
     elif operation == 'revoke' and receiver.can_grant_access_to_reports:

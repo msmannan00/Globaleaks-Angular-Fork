@@ -8,8 +8,10 @@
     </div>
     <div *ngIf="hasMultipleEntries(fieldAnswers[fields.id])">
         <div *ngFor="let entry of fieldAnswers[fields.id] | orderBy:['y', 'x']">
-            <div class="nested"><span class="text-muted">#{{index + 1}}</span></div>
-        <src-tip-field-answer-entry [field]="fields" class="nested"></src-tip-field-answer-entry>
+            <div class="nested">
+                <span class="text-muted">#{{index + 1}}</span>
+            </div>
+            <src-tip-field-answer-entry [field]="fields" class="nested"></src-tip-field-answer-entry>
         </div>
     </div>
 </div>
