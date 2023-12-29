@@ -7,6 +7,7 @@ import {AppDataService} from "@app/app-data.service";
 import {ErrorCodes} from "@app/models/app/error-code";
 import {Session} from "@app/models/authentication/session";
 import {TitleService} from "@app/shared/services/title.service";
+import {HttpHeaders} from "@angular/common/http";
 
 @Injectable({
   providedIn: "root"
@@ -152,17 +153,18 @@ export class AuthenticationService {
     return requestObservable;
   }
 
-  public getHeader(confirmation?: string) {
-    const header = new Map<string, string>();
+  public getHeader(confirmation?: string): HttpHeaders {
+    let headers = new HttpHeaders();
+
     if (this.session) {
-      header.set("X-Session", this.session.id);
-      header.set("Accept-Language", "en");
-    }
-    if (confirmation) {
-      header.set("X-Confirmation", confirmation);
+      headers = headers.set('X-Session', this.session.id);
+      headers = headers.set('Accept-Language', 'en');
     }
 
-    return header;
+    if (confirmation) {
+      headers = headers.set('X-Confirmation', confirmation);
+    }
+    return headers;
   }
 
   logout(callback?: () => void) {

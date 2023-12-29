@@ -270,9 +270,12 @@ export class TipComponent implements OnInit {
     (
       {
         next: async token => {
-          const ans =  this.cryptoService.proofOfWork(token.id).subscribe();
-          window.open("api/recipient/rtips/" + tipId + "/export" + "?token=" + token.id + ":" + ans);
-          this.appDataService.updateShowLoadingPanel(false);
+          this.cryptoService.proofOfWork(token.id).subscribe(
+             (result: number) => {
+               window.open("api/recipient/rtips/" + tipId + "/export" + "?token=" + token.id + ":" + result);
+               this.appDataService.updateShowLoadingPanel(false);
+            }
+          );
         }
       }
     );

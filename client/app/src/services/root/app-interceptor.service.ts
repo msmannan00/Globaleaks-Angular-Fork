@@ -55,9 +55,12 @@ export class appInterceptor implements HttpInterceptor {
     const authHeader = this.authenticationService.getHeader();
     let authRequest = httpRequest;
 
-    for (const [key, value] of authHeader) {
-      authRequest = authRequest.clone({headers: authRequest.headers.set(key, value)});
-    }
+    authHeader.keys().forEach(header => {
+      const headerValue = authHeader.get(header);
+      if(headerValue){
+        authRequest = authRequest.clone({headers: authRequest.headers.set(header, headerValue)});
+      }
+    });
 
     authRequest = authRequest.clone({
       headers: authRequest.headers.set("Accept-Language", this.getAcceptLanguageHeader() || ""),

@@ -49,6 +49,10 @@ export class TipCommentsComponent {
     );
   }
 
+  getSortedComments(data:Comment[]):Comment[]{
+    return data;
+  }
+
   onEnableTwoWayCommentsChange() {
     this.rTipService.operation("api/recipient/rtips/" + this.tipService.tip.id, "set", {
       "key": "enable_two_way_comments",

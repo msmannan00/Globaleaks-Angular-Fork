@@ -316,7 +316,10 @@ export class TipsComponent implements OnInit {
         })
       ), "update_date");
     }
+  }
 
+  orderbyCast(data:rtipResolverModel[]):rtipResolverModel[]{
+    return data;
   }
 
   onReportFilterChange(event:{ fromDate: string | null; toDate: string | null } ) {

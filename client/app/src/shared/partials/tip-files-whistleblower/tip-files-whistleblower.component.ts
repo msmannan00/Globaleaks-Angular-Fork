@@ -7,6 +7,7 @@ import {CryptoService} from "@app/shared/services/crypto.service";
 import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {WbFile} from "@app/models/app/shared-public-model";
 
+
 @Component({
   selector: "src-tip-files-whistleblower",
   templateUrl: "./tip-files-whistleblower.component.html"
@@ -31,6 +32,10 @@ export class TipFilesWhistleblowerComponent {
           }
         }
     );
+  }
+
+  getSortedWBFiles(data:WbFile[]):WbFile[]{
+    return data;
   }
 
   public toggleColLapse() {

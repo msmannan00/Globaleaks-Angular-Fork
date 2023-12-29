@@ -84,7 +84,7 @@
                         </span>
                     </div>
                     <div class="form-group" *ngIf="user.newpassword">
-                        <input class="d-none" type="password" name="disable-autocomplete-hack" />
+                        <input class="d-none" type="password" name="disable-autocomplete" />
                         <span class="input-group">
                             <input name="password" class="form-control" [(ngModel)]="setPasswordArgs.password" #password="ngModel" type="password" (passwordStrengthChange)="onPasswordStrengthChange($event)" [ngClass]="{'is-invalid': setPasswordArgs.password && (!password?.errors?.['passwordStrengthValidator'] && !password?.valid)}" autocomplete="off" passwordStrengthValidator />
                             <span class="input-group-append">

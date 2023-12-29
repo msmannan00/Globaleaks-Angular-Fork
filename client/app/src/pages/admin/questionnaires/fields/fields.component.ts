@@ -15,8 +15,7 @@ import {map, Observable, of} from "rxjs";
 import {Step, questionnaireResolverModel} from "@app/models/resolvers/questionnaire-model";
 import {ParsedFields} from "@app/models/component-model/parsedFields";
 import {Field, fieldtemplatesResolverModel} from "@app/models/resolvers/field-template-model";
-import {Children, Option, Step as Steps, TriggeredByOption} from "@app/models/app/shared-public-model";
-import {Questionnaire} from "@app/models/app/public-model";
+import {Children, Option, TriggeredByOption} from "@app/models/app/shared-public-model";
 
 @Component({
   selector: "src-fields",

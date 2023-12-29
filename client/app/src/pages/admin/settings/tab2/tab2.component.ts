@@ -51,7 +51,7 @@ export class Tab2Component implements OnInit {
   }
 
   ngOnInit(): void {
-      this.preferenceData = this.preferenceResolver.dataModel;
+    this.preferenceData = this.preferenceResolver.dataModel;
     this.authenticationData = this.authenticationService;
     this.authenticationData.permissions = {
       can_upload_files: false
@@ -84,6 +84,10 @@ export class Tab2Component implements OnInit {
       });
       this.utilsService.onFlowUpload(flowJsInstance, file)
     }
+  }
+
+  canUploadFiles(){
+    return this.authenticationData.session.permissions.can_upload_files;
   }
 
   deleteFile(url: string): void {

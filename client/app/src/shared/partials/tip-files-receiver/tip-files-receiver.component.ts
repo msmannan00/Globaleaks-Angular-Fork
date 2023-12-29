@@ -33,6 +33,10 @@ export class TipFilesReceiverComponent implements OnInit {
     };
   }
 
+  getSortedWBFiles(data:WbFile[]):WbFile[]{
+    return data;
+  }
+
   public downloadRFile(file: WbFile) {
     const param = JSON.stringify({});
     this.httpService.requestToken(param).subscribe

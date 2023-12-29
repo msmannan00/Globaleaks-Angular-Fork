@@ -3,6 +3,7 @@ import * as Flow from "@flowjs/flow.js";
 import { AuthenticationService } from "@app/services/helper/authentication.service";
 import { SubmissionService } from "@app/services/helper/submission.service";
 import { Observable } from "rxjs";
+import {Field} from "@app/models/resolvers/field-template-model";
 
 @Component({
   selector: "src-voice-recorder",
@@ -10,7 +11,7 @@ import { Observable } from "rxjs";
 })
 export class VoiceRecorderComponent implements OnInit {
   @Input() uploads: any;
-  @Input() field: any;
+  @Input() field: Field;
   @Input() fileUploadUrl: string;
   @Input() entryIndex: number;
   @Input() fieldEntry: string;
@@ -53,7 +54,7 @@ export class VoiceRecorderComponent implements OnInit {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       navigator.mediaDevices.getUserMedia({ audio: true })
         .then((stream) => {
-          this.startRecording(fileId, stream);
+          this.startRecording(fileId, stream).then();
         })
         .catch(() => {
           this.activeButton = null;
@@ -147,7 +148,7 @@ export class VoiceRecorderComponent implements OnInit {
       }
       this.secondsTracker = null;
 
-      if (this.seconds < this.field.attrs.min_len.value) {
+      if (this.seconds < parseInt(this.field.attrs.min_len.value)) {
         this.deleteRecording();
         observer.complete();
         return;
@@ -214,7 +215,7 @@ export class VoiceRecorderComponent implements OnInit {
         const settings = { noiseSuppression: true };
 
         stream.getAudioTracks().forEach(track => {
-          track.applyConstraints(settings);
+          track.applyConstraints(settings).then();
         });
 
         observer.complete();
@@ -251,7 +252,7 @@ export class VoiceRecorderComponent implements OnInit {
     const output: GainNode = audioContext.createGain();
     input.gain.value = output.gain.value = 1;
     const vocoderBands = this.generateVocoderBands(200, 16000, 128);
-    const vocoderPitchShift: number = -(1 / 12 - Math.random() * 1 / 24);
+    const vocoderPitchShift: number = -(1 / 12 - Math.random() / 24);
 
     for (let i = 0; i < vocoderBands.length; i++) {
       const carrier: OscillatorNode = audioContext.createOscillator();
@@ -284,5 +285,6 @@ export class VoiceRecorderComponent implements OnInit {
   }
 
 
+  protected readonly parseInt = parseInt;
 }
 
