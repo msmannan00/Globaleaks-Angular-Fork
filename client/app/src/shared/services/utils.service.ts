@@ -605,7 +605,7 @@ export class UtilsService {
   readFileAsText(file: File): Observable<string> {
     return new Observable<string>((observer) => {
       const reader = new FileReader();
-  
+
       reader.onload = (event) => {
         if (event.target) {
           observer.next(event.target.result as string);
@@ -614,11 +614,11 @@ export class UtilsService {
           observer.error(new Error("Event target is null."));
         }
       };
-  
+
       reader.onerror = (error) => {
         observer.error(error);
       };
-  
+
       reader.readAsText(file);
     });
   }
@@ -664,7 +664,30 @@ export class UtilsService {
   }
 
   deleteResource( list: any[], res: any): void {
-      list.splice(list.indexOf(res), 1);
+    list.splice(list.indexOf(res), 1);
   }
-  
+
+  generateCSV(dataString: string, fileName: string, headerx: string[]): void {
+    const data = JSON.parse(dataString);
+
+    if (!Array.isArray(data)) {
+      console.error('Invalid data format');
+      return;
+    }
+
+    const headers = Object.keys(data[0] || {});
+    const newHeader = headerx.join(',');
+    const csvContent = `${newHeader ? `${newHeader}\n` : ""}${data.map(row => headers.map(header => row[header]).join(',')).join('\n')}`;
+
+    if (!csvContent.trim()) {
+      console.warn('No data to export');
+      return;
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `${fileName}.csv`;
+    link.click();
+  }
 }

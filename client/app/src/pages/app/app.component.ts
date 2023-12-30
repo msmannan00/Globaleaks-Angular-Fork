@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectorRef, Component, Inject, Renderer2} from "@angular/core";
+import {AfterViewInit, ChangeDetectorRef, Component, Inject, OnInit, Renderer2} from "@angular/core";
 import {AppConfigService} from "@app/services/root/app-config.service";
 import {AppDataService} from "@app/app-data.service";
 import {UtilsService} from "@app/shared/services/utils.service";
@@ -22,7 +22,7 @@ import {AuthenticationService} from "@app/services/helper/authentication.service
     ])
   ]
 })
-export class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit, OnInit {
   showSidebar: boolean = true;
   isNavCollapsed: boolean = true;
   showLoadingPanel = false;

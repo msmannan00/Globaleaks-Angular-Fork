@@ -127,6 +127,10 @@ export class UserEditorComponent implements OnInit {
     }
   };
 
+  getUserID(){
+    return this.authenticationData.session.user_id;
+  }
+
   toggleUserEscrow(user: userResolverModel) {
     this.user.escrow = !this.user.escrow;
     this.utilsService.runAdminOperation("toggle_user_escrow", {"value": user.id}, true).subscribe();

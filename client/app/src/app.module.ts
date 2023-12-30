@@ -4,7 +4,7 @@ import {AppRoutingModule} from "@app/app-routing.module";
 import {AppComponent} from "@app/pages/app/app.component";
 import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from "@angular/common/http";
 import {AuthModule} from "@app/pages/auth/auth.module";
-import {APP_BASE_HREF, HashLocationStrategy, LocationStrategy,} from "@angular/common";
+import {APP_BASE_HREF, HashLocationStrategy, LocationStrategy, NgOptimizedImage,} from "@angular/common";
 import {SharedModule} from "@app/shared.module";
 import {HeaderComponent} from "@app/shared/partials/header/header.component";
 import {UserComponent} from "@app/shared/partials/header/template/user/user.component";
@@ -66,7 +66,8 @@ const translationModule = TranslateModule.forRoot({
     SharedModule,
     NgIdleKeepaliveModule.forRoot(),
     MarkdownModule.forRoot(),
-    NgxFlowModule
+    NgxFlowModule,
+    NgOptimizedImage
   ],
   providers: [
     ReceiptValidatorDirective,

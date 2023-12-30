@@ -1,5 +1,5 @@
 import {HttpClient} from "@angular/common/http";
-import {AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {FlowDirective} from "@flowjs/ngx-flow";
 import {Subscription} from "rxjs";
 import {AuthenticationService} from "@app/services/helper/authentication.service";
@@ -8,7 +8,7 @@ import {AuthenticationService} from "@app/services/helper/authentication.service
   selector: "src-image-upload",
   templateUrl: "./image-upload.component.html"
 })
-export class ImageUploadComponent implements AfterViewInit, OnDestroy {
+export class ImageUploadComponent implements AfterViewInit, OnDestroy, OnInit {
   @ViewChild("flowAdvanced")
   flow: FlowDirective;
   @ViewChild("uploader") uploaderElementRef!: ElementRef<HTMLInputElement>;

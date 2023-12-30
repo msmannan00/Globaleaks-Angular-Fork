@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, ViewChild} from "@angular/core";
+import {ChangeDetectorRef, Component, Input, OnInit, ViewChild} from "@angular/core";
 import {WbtipService} from "@app/services/helper/wbtip.service";
 import {AuthenticationService} from "@app/services/helper/authentication.service";
 import {UtilsService} from "@app/shared/services/utils.service";
@@ -10,7 +10,7 @@ import {Comment} from "@app/models/app/shared-public-model";
   selector: "src-tip-comments",
   templateUrl: "./tip-comments.component.html"
 })
-export class TipCommentsComponent {
+export class TipCommentsComponent implements OnInit{
   @Input() tipService: ReceiverTipService | WbtipService;
   @Input() key: string;
   @ViewChild(ScrollToBottomDirective)

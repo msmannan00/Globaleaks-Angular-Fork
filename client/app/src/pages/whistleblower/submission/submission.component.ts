@@ -23,7 +23,6 @@ export class SubmissionComponent {
   @ViewChildren("stepform") stepForms: QueryList<NgForm>;
 
   answers: Answers = {};
-  stepFormList:{ [key: string]: NgForm } = {};
   identity_provided = false;
   context_id = "";
   context: Context | undefined = undefined;
@@ -192,6 +191,10 @@ export class SubmissionComponent {
     }
 
     return uploading;
+  }
+
+  getContextID(){
+    return this.submissionService.context.id;
   }
 
   calculateEstimatedTime() {

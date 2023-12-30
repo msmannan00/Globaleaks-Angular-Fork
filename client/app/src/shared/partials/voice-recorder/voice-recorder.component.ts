@@ -23,8 +23,6 @@ export class VoiceRecorderComponent implements OnInit {
   audioPlayer: string | null = null;
   mediaRecorder: MediaRecorder | null = null;
   context: AudioContext = new AudioContext();
-  mediaStreamDestination: MediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(this.context);
-  recorder: MediaRecorder = new MediaRecorder(this.mediaStreamDestination.stream);
   recording_blob: any = null;
   flow: Flow;
   secondsTracker: NodeJS.Timer | null = null;

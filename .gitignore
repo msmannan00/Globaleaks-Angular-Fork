@@ -16,3 +16,4 @@ client/coverage/*
 client/cypress/downloads/*
 client/cypress/screenshots/*
 path.py
+client/.nyc_output/out.json

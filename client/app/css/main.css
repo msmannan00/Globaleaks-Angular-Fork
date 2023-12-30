@@ -821,19 +821,19 @@ p:last-child {
   margin-bottom: 1rem;
 }
 
-#language-picker-box .form-control {
+.language-picker-box .form-control {
   width: auto;
 }
 
 .login-status-box,
-#language-picker-box .form-control {
+.language-picker-box .form-control {
   height: 2.2rem;
   line-height: 2.2rem;
   padding: 0 1em;
   width: max-content;
 }
 
-#language-picker-box {
+.language-picker-box {
   width: 190px;
 }
 

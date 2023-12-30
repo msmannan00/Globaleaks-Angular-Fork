@@ -1,6 +1,6 @@
 <form name="preferenceResolver.dataModel.orm" #preferenceForm="ngForm" class="reveal" *ngIf="authenticationService.session">
     <div *ngIf="preferenceResolver.dataModel.picture" class="image-thumbnail">
-        <img class="receiver-image" alt="user picture" src="/s/{{preferenceResolver.dataModel.id}}" />
+        <img class="receiver-image" alt="user picture" ngSrc="/s/{{preferenceResolver.dataModel.id}}" width="500" height="500"/>
         <br />
     </div>
     <div>

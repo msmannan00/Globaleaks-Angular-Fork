@@ -9,7 +9,7 @@ import {TranslateService} from "@ngx-translate/core";
 })
 export class ReceiverCardComponent {
   @Input() submission: SubmissionService;
-  @Input() receiver: Receiver;
+  @Input() receiverModel: Receiver;
 
   constructor(protected translate: TranslateService) {
   }

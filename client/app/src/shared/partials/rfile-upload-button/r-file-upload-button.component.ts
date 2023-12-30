@@ -3,7 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   EventEmitter,
-  Input,
+  Input, OnDestroy,
   OnInit,
   Output,
   ViewChild
@@ -21,7 +21,7 @@ import { Field } from "@app/models/resolvers/field-template-model";
   templateUrl: "./r-file-upload-button.component.html",
   viewProviders: [{provide: ControlContainer, useExisting: NgForm}]
 })
-export class RFileUploadButtonComponent implements AfterViewInit, OnInit {
+export class RFileUploadButtonComponent implements AfterViewInit, OnInit, OnDestroy {
 
   @Input() fileUploadUrl: string;
   @Input() formUploader: boolean = true;

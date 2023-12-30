@@ -1,4 +1,4 @@
-import {Component} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {WbTipResolver} from "@app/shared/resolvers/wb-tip-resolver.service";
 import {FieldUtilitiesService} from "@app/shared/services/field-utilities.service";
 import {ActivatedRoute} from "@angular/router";
@@ -14,7 +14,7 @@ import {WhistleblowerIdentity} from "@app/models/app/shared-public-model";
   selector: "src-tippage",
   templateUrl: "./tippage.component.html"
 })
-export class TippageComponent {
+export class TippageComponent implements OnInit{
 
   fileUploadUrl: string;
   tip_id = null;

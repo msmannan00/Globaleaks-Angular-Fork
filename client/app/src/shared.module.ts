@@ -1,5 +1,5 @@
 import {NgModule} from "@angular/core";
-import {CommonModule} from "@angular/common";
+import {CommonModule, NgOptimizedImage} from "@angular/common";
 import {FooterComponent} from "@app/shared/partials/footer/footer.component";
 import {ReceiptComponent} from "@app/shared/partials/receipt/receipt.component";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -108,7 +108,8 @@ import { SwitchComponent } from "@app/shared/components/switch/switch.component"
     NgbNavLink,
     NgbNavContent,
     NgbDropdownModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    NgOptimizedImage
   ],
   declarations: [
     FooterComponent,

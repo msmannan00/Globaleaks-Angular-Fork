@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnInit} from "@angular/core";
 import {NgForm} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {Constants} from "@app/shared/constants/constants";
@@ -17,7 +17,7 @@ import {questionnaireResolverModel} from "@app/models/resolvers/questionnaire-mo
   selector: "src-tab5",
   templateUrl: "./tab5.component.html"
 })
-export class Tab5Component {
+export class Tab5Component implements OnInit{
   @Input() contentForm: NgForm;
   userData: userResolverModel[];
   questionnaireData: questionnaireResolverModel[];

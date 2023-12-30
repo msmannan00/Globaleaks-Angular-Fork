@@ -1,4 +1,4 @@
-import {Component, Input} from "@angular/core";
+import {Component, Input, OnInit} from "@angular/core";
 import {NgForm} from "@angular/forms";
 import {LanguageUtils} from "@app/pages/admin/settings/helper-methods/language-utils";
 import {NodeResolver} from "@app/shared/resolvers/node.resolver";
@@ -8,7 +8,7 @@ import {UtilsService} from "@app/shared/services/utils.service";
   selector: "src-tab4",
   templateUrl: "./tab4.component.html"
 })
-export class Tab4Component {
+export class Tab4Component implements OnInit{
   @Input() contentForm: NgForm;
 
   vars: {language_to_customize:string, text_to_customize:string,custom_text:string} = {language_to_customize:"", text_to_customize:"",custom_text:""};

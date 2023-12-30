@@ -15,7 +15,6 @@ import {Router} from "@angular/router";
 import {rtipResolverModel} from "@app/models/resolvers/rtips-resolver-model";
 import {Receiver} from "@app/models/reciever/reciever-tip-data";
 import {AuthenticationService} from "@app/services/helper/authentication.service";
-import {ReceiverTipService} from "@app/services/helper/receiver-tip.service";
 import {HttpService} from "@app/shared/services/http.service";
 import { Observable, from, switchMap } from "rxjs";
 
@@ -60,7 +59,7 @@ export class TipsComponent implements OnInit {
     searchPlaceholderText: this.translateService.instant("Search")
   };
 
-  constructor(protected authenticationService: AuthenticationService, protected httpService: HttpService, protected RTipService: ReceiverTipService,private appConfigServices: AppConfigService, private router: Router, protected RTips: RTipsResolver, protected preference: PreferenceResolver, private modalService: NgbModal, protected utils: UtilsService, protected appDataService: AppDataService, private translateService: TranslateService, private tokenResourceService: TokenResource) {
+  constructor(protected authenticationService: AuthenticationService, protected httpService: HttpService, private appConfigServices: AppConfigService, private router: Router, protected RTips: RTipsResolver, protected preference: PreferenceResolver, private modalService: NgbModal, protected utils: UtilsService, protected appDataService: AppDataService, private translateService: TranslateService, private tokenResourceService: TokenResource) {
 
   }
 
