@@ -51,7 +51,7 @@
     <span *ngSwitchDefault class="entry-text">
         <span *ngIf="entry['value']">
             <span class="preformatted">{{maskContent(field.id, entry['index'], entry['value'])}}</span>
-            <span class="float-end edit" id="edit-question" (click)="redactInformation('answer', field.id, entry['index'], entry['value'])" *ngIf="redactMode && (preferenceResolver.dataModel.can_mask_information || preferenceResolver.dataModel.can_redact_information)" data-toggle="tooltip" title="{{redactOperationTitle | translate}}">
+            <span class="float-end edit" id="edit-question" (click)="redactInformation('answer', field, entry['index'], entry['value'])" *ngIf="redactMode && (preferenceResolver.dataModel.can_mask_information || preferenceResolver.dataModel.can_redact_information)" data-toggle="tooltip" title="{{redactOperationTitle | translate}}">
               <i class="fa-solid fa-eraser"></i>
             </span>
         </span>

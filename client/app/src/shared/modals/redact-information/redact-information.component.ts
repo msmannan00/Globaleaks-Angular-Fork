@@ -111,9 +111,11 @@ export class RedactInformationComponent implements OnInit{
     }
 
     if (this.redaction) {
+      console.log('updTWWWWW');
       redactionData.id = this.redaction.id;
       this.receiverTipService.updateRedaction(redactionData);
     } else {
+      console.log('newwwwwwwwwww');
       this.receiverTipService.newRedaction(redactionData);
     }
 
