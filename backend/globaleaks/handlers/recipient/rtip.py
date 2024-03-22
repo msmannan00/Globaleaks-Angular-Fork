@@ -452,7 +452,8 @@ def db_redact_whistleblower_identities(answers, redaction):
         # if not re.match(requests.uuid_regexp, key) or \
         #         not isinstance(answers[key], list):
         #     continue
-
+        if isinstance(answers[key], bool):
+            continue
         for inner_idx, answer in enumerate(answers[key]):
             if 'value' in answer:
                 print(key,'keyyyyyyyyyyy')
