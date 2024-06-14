@@ -184,7 +184,43 @@ class Operations(BaseHandler):
                               self.session.properties["new_receipt"],
                               "operator_session" in self.session.properties)
 
+def serialize_log(log):
+    return {
+        'date': log.date,
+        'type': log.type,
+        'user_id': log.user_id,
+        'object_id': log.object_id,
+        'data': log.data
+    }
 
+
+@transact
+def get_audit_log(session, id,tip):
+    logs = session.query(models.AuditLog).filter(models.AuditLog.object_id == id)
+    return [serialize_log(log) for log in logs]
+
+@transact
+def get_status_label(session, status_uuid):
+    """
+    Fetch the label for the given status UUID from the Submissionstatus table.
+    """
+    submissionstatus = session.query(models.SubmissionStatus).filter_by(id=status_uuid).first()
+    if submissionstatus:
+        return submissionstatus.label['en']
+    else:
+        return "Unknown Status"
+    
+@transact
+def get_substatus_label(session, substatus_uuid):
+    """
+    Fetch the label for the given substatus UUID from the Submissionsubstatus table.
+    """
+    submissionsubstatus = session.query(models.SubmissionSubStatus).filter_by(id=substatus_uuid).first()
+    if submissionsubstatus:
+        return submissionsubstatus.label['en']
+    else:
+        return "Unknown Substatus"
+    
 class WBTipInstance(BaseHandler):
     """
     This interface expose the Whistleblower Tip.
@@ -196,9 +232,41 @@ class WBTipInstance(BaseHandler):
         tip, crypto_tip_prv_key = yield get_wbtip(self.session.user_id, self.request.language)
 
         if crypto_tip_prv_key:
+            logs = yield get_audit_log(tip['id'],tip)
             tip = yield deferToThread(decrypt_tip, self.session.cc, crypto_tip_prv_key, tip)
-
+            tip = yield deferToThread(process_logs, logs, tip)
+        # Return the modified tip
         returnValue(tip)
+
+def process_logs(logs, tip):
+    for log in logs:
+        if log['type'] == 'update_report_status':
+            status_details = log.get('data', {})
+            if not isinstance(status_details, dict):
+                status_change_string = "Status changed"
+            else:
+                status = status_details.get('status')
+                substatus = status_details.get('substatus')
+
+                if status:
+                    status_label = get_status_label(status)
+                    if substatus:
+                        substatus_label = get_substatus_label(substatus)
+                        status_change_string = f"Status changed to {status_label} - {substatus_label}"
+                    else:
+                        status_change_string = f"Status changed to {status_label}"
+                else:
+                    status_change_string = "Status changed"
+
+            log_data = {
+                'id': log['object_id'],
+                'creation_date': log['date'],
+                'content': status_change_string,
+                'author_id': log['user_id'],
+                'visibility': 'public'
+            }
+            tip['comments'].append(log_data)
+    return tip
 
 
 class WBTipCommentCollection(BaseHandler):
