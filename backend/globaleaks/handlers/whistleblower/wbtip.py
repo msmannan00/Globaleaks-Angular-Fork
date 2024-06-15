@@ -24,6 +24,7 @@ from globaleaks.utils.fs import directory_traversal_check
 from globaleaks.utils.log import log
 from globaleaks.utils.templating import Templating
 from globaleaks.utils.utility import datetime_now, datetime_null
+from globaleaks.handlers.tip_auditlog_parser import process_logs, get_audit_log
 
 
 def db_notify_report_update(session, user, rtip, itip):
@@ -196,8 +197,10 @@ class WBTipInstance(BaseHandler):
         tip, crypto_tip_prv_key = yield get_wbtip(self.session.user_id, self.request.language)
 
         if crypto_tip_prv_key:
+            logs = yield get_audit_log(tip['id'])
             tip = yield deferToThread(decrypt_tip, self.session.cc, crypto_tip_prv_key, tip)
 
+            tip = yield  process_logs(logs, tip)
         returnValue(tip)
 
 

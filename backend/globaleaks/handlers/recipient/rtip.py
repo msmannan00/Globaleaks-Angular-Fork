@@ -32,6 +32,7 @@ from globaleaks.utils.log import log
 from globaleaks.utils.templating import Templating
 from globaleaks.utils.utility import datetime_now, datetime_null, datetime_never
 from globaleaks.utils.json import JSONEncoder
+from globaleaks.handlers.tip_auditlog_parser import process_logs, get_audit_log
 
 
 def db_notify_grant_access(session, user):
@@ -1126,7 +1127,9 @@ class RTipInstance(OperationHandler):
         if State.tenants[self.request.tid].cache.encryption and crypto_tip_prv_key:
             tip = yield deferToThread(decrypt_tip, self.session.cc, crypto_tip_prv_key, tip)
 
+        logs = yield get_audit_log(tip['id'])
         tip = yield redact_report(self.session.user_id, tip)
+        tip = yield process_logs(logs, tip)
 
         returnValue(tip)
 
