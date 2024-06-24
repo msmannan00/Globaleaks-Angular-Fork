@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from globaleaks.orm import transact
-from datetime import datetime
 from globaleaks import models
 
 def serialize_auditlog(log):
