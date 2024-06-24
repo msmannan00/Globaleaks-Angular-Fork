@@ -6,6 +6,8 @@ import {ReceiverTipService} from "@app/services/helper/receiver-tip.service";
 import {Comment} from "@app/models/app/shared-public-model";
 import {PreferenceResolver} from "@app/shared/resolvers/preference.resolver";
 import {MaskService} from "@app/shared/services/mask.service";
+import { AppDataService } from "@app/app-data.service";
+import { formatDate } from "@angular/common";
 
 @Component({
   selector: "src-tip-comments",
@@ -24,7 +26,7 @@ export class TipCommentsComponent implements OnInit {
   comments: Comment[] = [];
   newComments: Comment;
 
-  constructor(private maskService:MaskService,protected preferenceResolver:PreferenceResolver,private rTipService: ReceiverTipService, protected authenticationService: AuthenticationService, protected utilsService: UtilsService, private cdr: ChangeDetectorRef) {
+  constructor(protected appDataService: AppDataService,private maskService:MaskService,protected preferenceResolver:PreferenceResolver,private rTipService: ReceiverTipService, protected authenticationService: AuthenticationService, protected utilsService: UtilsService, private cdr: ChangeDetectorRef) {
 
   }
 
@@ -36,6 +38,10 @@ export class TipCommentsComponent implements OnInit {
     this.collapsed = !this.collapsed;
   }
 
+  formatDate(dateString: string): string {
+    return formatDate(dateString, 'MMMM d, yyyy', 'en-US');
+  }
+  
   newComment() {
     const response = this.tipService.newComment(this.newCommentContent, this.key);
     this.newCommentContent = "";

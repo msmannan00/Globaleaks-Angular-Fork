@@ -20,18 +20,11 @@ def serialize_comment_log(log):
     return {
         'id': log['object_id'],
         'creation_date': log['date'],
-        'content': log.get('content', 'changed'),
+        'content': log['content'],
         'author_id': log['user_id'],
         'visibility': 'public',
-        'type': 'information'
+        'type': 'auditlog'
     }
-
-def get_label(session, label_id, table):
-    """
-    Fetch the label for a given UUID from the specified table.
-    """
-    result = session.query(table).filter_by(id=label_id).first()
-    return result.label['en'] if result else f"Unknown {table.__tablename__}"
 
 def get_audit_log(session, object_id):
     """
@@ -43,19 +36,6 @@ def get_audit_log(session, object_id):
     )
     return [serialize_auditlog(log) for log in logs]
 
-def format_date(date):
-    """
-    Format the date to the desired string format.
-    """
-    return date.strftime("%B %d, %Y")
-
-def get_user_name(session, user_id):
-    """
-    Retrieve the user's name given their user ID.
-    """
-    user = session.query(models.User).filter_by(id=user_id).one_or_none()
-    return user.name if user else 'Unknown User'
-
 @transact
 def process_logs(session, tip ,tip_id):
     """
@@ -63,28 +43,18 @@ def process_logs(session, tip ,tip_id):
     """
     logs = get_audit_log(session,tip_id)
     for log in logs:
-        status_change_string = "changed"
         status_details = log.get('data', {})
 
         if isinstance(status_details, dict):
-            status = status_details.get('status')
-            sub_status = status_details.get('substatus')
-
-            if status:
-                status_label = get_label(session, status, models.SubmissionStatus)
-                status_change_string = f"changed to {status_label}"
-
-                if sub_status:
-                    sub_status_label = get_label(session, sub_status, models.SubmissionSubStatus)
-                    status_change_string += f" - {sub_status_label}"
-
-        author_name = get_user_name(session, log['user_id'])
-        formatted_date = format_date(log['date'])
-        formatted_content = (f"Author: {author_name}\n"
-                             f"Date: {formatted_date}\n"
-                             f"Status: {status_change_string}")
-
-        log['content'] = formatted_content
-        tip['comments'].append(serialize_comment_log(log))
+            status = status_details.get('status', None)
+            sub_status = status_details.get('substatus', None) 
+    
+            formatted_content = {
+                "status": status,
+                "substatus": sub_status
+            }
+    
+            log['content'] = formatted_content
+            tip['comments'].append(serialize_comment_log(log))
 
     return tip

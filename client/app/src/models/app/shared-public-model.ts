@@ -130,7 +130,7 @@ export interface Option {
 export interface Comment {
   id: string;
   creation_date: string;
-  content: string;
+  content: any;
   author_id: string;
   visibility: string;
   type:string;
